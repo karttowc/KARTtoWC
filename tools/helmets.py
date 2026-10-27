@@ -1,4 +1,4 @@
-"""Plain helmet (pattern 1 of the sheet) + one thin side pinstripe in the pattern colour. Cut from the helmet sheet (data/helmets_src/sheet.png, 4x2 grid on flat blue) into 8 pattern sprites -> data/helmets.json.
+"""Plain helmet with one thin side pinstripe (data/helmets_src/plain_line.png, drawn by image AI on flat blue). Earlier 8-pattern sheet kept as sheet.png (data/helmets_src/sheet.png, 4x2 grid on flat blue) into 8 pattern sprites -> data/helmets.json.
 Key colours: shell green (-> helmet base), pattern magenta (-> helmet sec), visor cyan (-> visor tint). Recoloured in-game.
 Also removes the dark rim shading right in front of the rear spoiler (so the spoiler reads as part of the shell).
 Usage: python3 tools/helmets.py
@@ -19,15 +19,14 @@ def cls(p):
   if .45<=h<.6:return 'C'
   return 'o'
 lum=lambda c:.3*c[0]+.59*c[1]+.11*c[2]
-sh=Image.open(R/'data/helmets_src/sheet.png').convert('RGBA');SW,SH=sh.size;p=sh.load()
+sh=Image.open(R/'data/helmets_src/plain_line.png').convert('RGBA');SW,SH=sh.size;p=sh.load()
 for y in range(SH):
   for x in range(SW):
     r,g,b,a=p[x,y]
     if b>r+50 and b>g+50:p[x,y]=(0,0,0,0)
 out=[]
 for i in range(1):
-  r,c=divmod(i,4)
-  cell=sh.crop((c*SW//4,r*SH//2,(c+1)*SW//4,(r+1)*SH//2));cell=cell.crop(cell.getbbox())
+  cell=sh.crop(sh.getbbox())
   h=round(cell.size[1]*W/cell.size[0])
   s=cell.convert('RGBa').resize((W,h),Image.BOX).convert('RGBA')
   s.putalpha(s.getchannel('A').point(lambda v:255 if v>=128 else 0))
@@ -59,16 +58,6 @@ for i in range(1):
     for x in range(0,min(W,(L[y] or 0)+16)):
       k=cls(px[x,y])
       if k in 'GM' and main[k] and lum(px[x,y])<lum(main[k])*.9:px[x,y]=main[k]+(255,)
-  # thin side pinstripe (magenta key -> helmet sec): under the visor, flowing back and slightly up
-  P=[(99,67),(60,70),(25,62),(4,50)]
-  for k in range(401):
-    t=k/400;pts=P[:]
-    while len(pts)>1:pts=[(a[0]+(b2[0]-a[0])*t,a[1]+(b2[1]-a[1])*t) for a,b2 in zip(pts,pts[1:])]
-    for dx in range(2):
-      for dy in range(2):
-        X,Y=int(pts[0][0])+dx-1,int(pts[0][1])+dy-1
-        if 0<=X<W and 0<=Y<h and cls(px[X,Y])=='G':
-          r_,g_,b_,_=px[X,Y];_h,l_,s_=colorsys.rgb_to_hls(r_/255,g_/255,b_/255);q=colorsys.hls_to_rgb(.833,l_,s_);px[X,Y]=tuple(int(v*255) for v in q)+(255,)
   b=io.BytesIO();s.quantize(96,method=Image.FASTOCTREE).save(b,'PNG',optimize=True);out.append('data:image/png;base64,'+base64.b64encode(b.getvalue()).decode())
 (R/'data/helmets.json').write_text(json.dumps(out),encoding='utf-8')
 print(len(out),'helmet',sum(len(x) for x in out)//1024,'KB')

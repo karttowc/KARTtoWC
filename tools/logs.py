@@ -6,7 +6,7 @@ Usage: LOG_KEY=... python3 tools/logs.py [--old] [log files...]
   Log files = "플레이 기록 파일 받기" downloads (unsent queue), merged in.
 """
 import os,sys,json,urllib.request,urllib.parse,collections
-URL=''  # v2 sheet /exec URL
+URL='https://script.google.com/macros/s/AKfycbyvaW_ZcP86QI4zMVgIvp67PHEpDinuXji1EfBDgQUT11YoB62IAw9qDwIOfyilME89vQ/exec'  # v2 sheet (tools/logsheet.gs)
 OLD_URL='https://script.google.com/macros/s/AKfycbwQLNST9m47Rbh9GRou9a2Yrl0L0cYt8ImopVt-ZC0TKSZcxVAWrTCNkuFCChwJuKIE/exec'
 DB,ST='play_logs.json','play_logs_state.json'
 key=os.environ.get('LOG_KEY');args=sys.argv[1:];old='--old' in args;files=[a for a in args if a!='--old']

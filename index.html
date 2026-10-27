@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>카트부터 월챔까지</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;700&family=Mrs+Saint+Delafield&display=swap">
 <script data-goatcounter="https://lchanwoo05.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <style>
 /* Layout: one phone-width column, cards stacked, bottom tab bar — paddock timing-screen numerals on a Toss-style dark app */
@@ -67,9 +67,11 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .cxp .cl{font-size:11px;color:#5A6378;line-height:1.6;margin:0 0 14px}
 .cxp .sigs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
 .cxp .sb{position:relative;height:66px;border-bottom:1px solid #121725}.cxp .sb svg{position:absolute;inset:0}.cxp .sb small{position:absolute;bottom:-17px;left:0;font-size:10px;color:#5A6378}
+.cxp .tsig{position:absolute;left:2px;bottom:-6px;white-space:nowrap;font-family:'Mrs Saint Delafield',cursive;font-size:44px;line-height:1;color:#1B2A5C;transform:rotate(-4deg);transform-origin:left bottom;clip-path:inset(0 100% 0 0);animation:cxwipe .6s 2s ease-in-out forwards}
+@keyframes cxwipe{to{clip-path:inset(0 -10% 0 0)}}
 .stp{position:absolute;width:92px;height:92px;border-radius:50%;border:4px double var(--stc);color:var(--stc);display:grid;place-content:center;text-align:center;font-family:var(--num);font-weight:700;font-size:13px;letter-spacing:.05em;line-height:1.1;opacity:0;animation:cxstamp .45s cubic-bezier(.3,1.4,.5,1) forwards}
 .stp img{width:32px;height:32px;object-fit:contain;display:block;margin:0 auto}
-.cxp .stp{right:12px;bottom:24px;animation-delay:2.6s}
+.cxp .stp{right:10px;bottom:92px;animation-delay:2.6s}
 @keyframes cxstamp{0%{opacity:0;transform:scale(2.4) rotate(-24deg)}70%{opacity:1;transform:scale(.92) rotate(-12deg)}100%{opacity:1;transform:scale(1) rotate(-12deg)}}
 .cxhint.end{color:#fff;font-weight:700;font-size:14px;animation:cxbl2 1.2s ease-in-out infinite}@keyframes cxbl2{50%{opacity:.4}}
 .cxhint{position:absolute;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12px;color:rgba(255,255,255,.5);z-index:9}
@@ -3832,8 +3834,13 @@ function sigSVG(st,w,h,color){const pd=4,ds=st.map(s=>s.map(([x,y],i)=>`${i?'L':
   return`<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%">${ds.map(d=>`<path d="${d}" fill="none" stroke="${color}" stroke-width="${Math.max(1.6,h/26)}" stroke-linecap="round" stroke-linejoin="round"/>`).join('')}</svg>`}
 function drawSig(svg,delay,dur){if(!svg)return;const ps=[...svg.querySelectorAll('path')],L=ps.map(q=>q.getTotalLength?q.getTotalLength():100),tot=L.reduce((a,b)=>a+b,0)||1;let t=delay;
   ps.forEach((q,i)=>{q.style.strokeDasharray=L[i];q.style.strokeDashoffset=L[i];const d=dur*L[i]/tot;if(q.animate)q.animate([{strokeDashoffset:L[i]},{strokeDashoffset:0}],{duration:d,delay:t,fill:'forwards',easing:'ease-in-out'});else q.style.strokeDashoffset=0;t+=d})}
-function teamSig(id){let s=[...String(id)].reduce((a,c)=>a*31+c.charCodeAt(0),7)>>>0;const r=()=>(s=(s*1103515245+12345)>>>0)/4294967296,a=[];let x=.08;
-  for(let i=0;i<7;i++){const w=.07+r()*.06;for(let k=0;k<=8;k++){const t=k/8;a.push([x+w*t,.55-.35*Math.sin(t*Math.PI)*(.6+r()*.5)+(r()-.5)*.05])}x+=w*.9}return[a,[[.1,.8],[.5,.72],[.9,.78]]]}
+// team-side signature: F1 team principal, otherwise the team's own name (English, script font)
+const TEAM_TP={mercedes:'Toto Wolff',redbull:'Laurent Mekies',ferrari:'Fred Vasseur',mclaren:'Andrea Stella',astonmartin:'Adrian Newey',alpine:'Flavio Briatore',racingbulls:'Alan Permane',williams:'James Vowles',haas:'Ayao Komatsu',audi:'Jonathan Wheatley',cadillac:'Graeme Lowdon'};
+const NAME_EN={'KR 모터스포츠':'KR Motorsport','토니 카트 레이싱':'Tony Kart Racing','버드 카트':'Bird Kart','파크 레이싱':'Park Racing','로컬 카트 클럽':'Local Kart Club','프레마':'Prema Racing','반 아메르스포르트':'Van Amersfoort','US 레이싱':'US Racing','제타 모터스포츠':'Zeta Motorsport','ART 그랑프리':'ART Grand Prix','KIC 모터스포츠':'KIC Motorsport','AIX 레이싱':'AIX Racing','인빅타':'Invicta Racing','캄포스':'Campos Racing','트라이던트':'Trident','하이테크':'Hitech',
+ 'A.J. 포이트 레이싱':'A.J. Foyt Racing','B-Max 레이싱':'B-Max Racing','BMW 팀 WRT':'BMW Team WRT','DS 펜스키':'DS Penske','HRT (포드)':'HRT','그라서 (람보르기니)':'Grasser Racing','나카지마 레이싱':'Nakajima Racing','닛산 포뮬러E 팀':'Nissan Formula E','데일 코인 레이싱':'Dale Coyne Racing','도코모 팀 단델라이언':'Team Dandelion','되르 (맥라렌)':'Dörr Motorsport','란트 (포르쉐)':'Land Motorsport','란트그라프 (메르세데스-AMG)':'Landgraf Motorsport','레이할 레터맨 래니건':'Rahal Letterman Lanigan','로라 야마하 ABT':'Lola Yamaha ABT','마힌드라 레이싱':'Mahindra Racing','만타이 (포르쉐)':'Manthey Racing','메이어 생크 레이싱':'Meyer Shank Racing','세루모·인깅':'Cerumo INGING','슈베르트 (BMW)':'Schubert Motorsport','시트로엥 레이싱':'Citroën Racing','아프트 (람보르기니)':'Abt Sportsline','안드레티 글로벌':'Andretti Global','안드레티 포뮬러E':'Andretti Formula E','알핀 인듀어런스 팀':'Alpine Endurance','애로우 맥라렌':'Arrow McLaren','애스턴마틴 THOR 팀':'Aston Martin THOR','에밀 프라이 (페라리)':'Emil Frey Racing','엔비전 레이싱':'Envision Racing','윈워드 (메르세데스-AMG)':'Winward Racing','재규어 TCS 레이싱':'Jaguar TCS Racing','정코스 홀린저 레이싱':'Juncos Hollinger','제네시스 마그마 레이싱':'Genesis Magma Racing','칩 가나시 레이싱':'Chip Ganassi Racing','캐딜락 팀 JOTA':'Cadillac Hertz JOTA','컴투유 (애스턴마틴)':'Comtoyou Racing','콘도 레이싱':'Kondo Racing','쿠프라 키로':'Cupra Kiro','토요타 가주 레이싱':'Toyota Gazoo Racing','팀 고':'Team Goh','팀 무겐':'Team Mugen','팀 임풀':'Team Impul','팀 펜스키':'Team Penske','페라리 AF 코르세':'Ferrari AF Corse','포르쉐 포뮬러E 팀':'Porsche Formula E','푸조 토탈에너지':'Peugeot TotalEnergies'};
+function teamSigName(o,I){if(o.kind==='f1'||o.kind==='reserve')return TEAM_TP[o.teamId]||TEAM_EN[o.teamId]||I.name;
+  const n=o.kind==='alt'?o.altTeam:o.team&&o.team.name;return NAME_EN[n]||(/^[\x20-\x7E]+$/.test(n||'')?n:SER_EN[o.kind==='alt'?o.altId:o.series]||'Team')}
+function fitSig(el){if(!el)return;const go=()=>{const W=el.parentNode.clientWidth-4;let f=44;el.style.fontSize='';while(el.scrollWidth>W&&f>16){f--;el.style.fontSize=f+'px'}};go();document.fonts&&document.fonts.ready.then(go)}
 function sigPad(el,done){
   el.innerHTML=`<div class="cxpad"><h3>계약서에 사인해 주세요</h3><p>처음 한 번만 해요. 다음 계약부터는 이 사인이 자동으로 들어가요.</p><canvas width="900" height="300"></canvas><div class="row"><button class="btn ghost" type="button" data-x="clr">지우기</button><button class="btn" type="button" data-x="ok" disabled>사인 완료</button></div></div>`;
   const c=el.querySelector('canvas'),g=c.getContext('2d'),strokes=[];let cur=null;g.lineWidth=7;g.lineCap='round';g.lineJoin='round';g.strokeStyle='#121725';
@@ -3854,10 +3861,10 @@ function contractShow(o,done){
       <div class="cxp"><div class="hd">${mark}<div><b>드라이버 계약서</b><span>No. ${S.year}-${String(p.num).padStart(3,'0')} · ${esc(I.name)}</span></div></div>
         <div class="bd">${avatar(pAv(p),p.helmet,64)}<dl><dt>드라이버</dt><dd>${esc(p.name)} #${esc(p.num)}</dd><dt>계약</dt><dd>${esc(I.line)}</dd><dt>조건</dt><dd>${esc(I.terms)}</dd></dl></div>
         <p class="cl">위 드라이버는 팀의 레이스 프로그램에 성실히 참여하며, 팀은 시즌 동안 머신과 지원을 제공한다.</p>
-        <div class="sigs"><div class="sb me">${sigSVG(p.sig,140,70,'#121725')}<small>드라이버 서명</small></div><div class="sb tm">${sigSVG(teamSig(o.teamId||o.series||o.altId),140,70,'#2B3550')}<small>${esc(I.name)} 대표</small></div></div>
+        <div class="sigs"><div class="sb me">${sigSVG(p.sig,140,70,'#121725')}<small>드라이버 서명</small></div><div class="sb tm"><div class="tsig">${esc(teamSigName(o,I))}</div><small>${esc(I.name)} ${o.kind==='f1'||o.kind==='reserve'?'팀 대표':'대표'}</small></div></div>
         <div class="stp" style="--stc:${I.color}">${I.logo?`<img src="${I.logo}" alt="">`:''}APPROVED</div></div>
       <div class="cxhint">탭해서 건너뛰기</div></div>`;
-    drawSig(el.querySelector('.sb.me svg'),700,1200);drawSig(el.querySelector('.sb.tm svg'),2000,500);
+    drawSig(el.querySelector('.sb.me svg'),700,1200);fitSig(el.querySelector('.tsig'));
     if(!I.big&&!I.alt){later(finish,3900);el.onclick=finish;return}
     let opened=false;
     const open=()=>{if(opened)return;opened=true;const bk=el.querySelector('.bk');
@@ -4246,4 +4253,5 @@ S=load();if(S){const p=S.p;if(S.train!=='rest')S.train='focus';avatarCanvas(pAv(
   S.f1.forEach(d=>{if(d.rookie&&!d.nm2){d.name=genName(d.nationality);d.nm2=1}});[...S.f1,...(S.jr||[]),...(S.rival?[S.rival]:[])].forEach(d=>{if(/니에미/.test(d.name))d.name=genName(d.nationality||d.nat)});if(!p.scout&&!p.retired)scoutInit(p);{const rd=S.f1.find(d=>d.id==='rival');if(rd)rd.id='ex'+Date.now()}S.rival=null;p.fans??=10;p.morale??=60;p.repBonus??=0;if(p.val==null){p.val=0;p.valPeak=0}p.challenges??=[];p.monaco??=false;S.events??=[];S.challenge??=null;S.news??=null;S.train??=null;S.react??=null;S.vacancies??=[];if(S.phase==='progress'&&!S.season)S.phase='result';if(S.news&&!S.news.heads)S.news=null;S.notice??=null;p.contract??=null;p.helmet=normHelmet(p.helmet)}render();
 (async()=>{try{if(window.claude&&window.claude.use){DL=await window.claude.use('downloads');if(DL)render()}}catch(_){}})();
 document.fonts&&document.fonts.ready.then(()=>{if(S&&S.p.retired)render()});
+try{document.fonts&&document.fonts.load("44px 'Mrs Saint Delafield'")}catch(e){}
 </script>

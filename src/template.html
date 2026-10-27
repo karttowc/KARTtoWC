@@ -230,6 +230,7 @@ label.lbl{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--
 .cardimg{width:100%;border-radius:18px;display:block}
 .prog{min-height:calc(100vh - 60px);display:flex;flex-direction:column;gap:18px;padding-top:40px}
 .prog .h2{font-size:30px;min-height:2.6em}
+.prog .sheet .h2{font-size:26px;min-height:0}
 .progbar{height:8px;background:var(--surface-2);border-radius:8px;overflow:hidden}
 .progbar i{display:block;height:100%;width:0;background:var(--accent);border-radius:8px;transition:width .2s linear}
 .progrank{display:flex;align-items:baseline;gap:10px}
@@ -1331,22 +1332,22 @@ function applyIncident(inc,j){
 
 /* ---------- mid-season gamble ---------- */
 const GACHA=[
- {id:'boxing',title:'복싱 훈련 해볼까요?',desc:'반사신경과 멘탈에 좋대요. 하지만 스파링 중에 다칠 수도 있어요.',p:.65,win:{stats:{mental:3,race:2}},inj:[1,1]},
- {id:'mtb',title:'산악자전거 체력 훈련',desc:'지구력은 확실히 오르지만 넘어지면 큰일이에요.',p:.65,win:{stats:{consistency:3,tyre:2}},inj:[1,2]},
- {id:'kart',title:'옛 라이벌들과 카트 레이스',desc:'감각이 날카로워지지만 휠투휠 사고가 잦아요.',p:.6,win:{stats:{race:3,quali:1}},inj:[1,1]},
- {id:'simnight',title:'시뮬레이터 밤샘 세션',desc:'예선 감각이 확 오르지만 피로가 쌓이면 다음 레이스를 망쳐요.',p:.6,win:{stats:{quali:3}},slump:6},
- {id:'skydive',title:'스폰서의 스카이다이빙 이벤트',desc:'성공하면 화제가 되지만 착지가 나쁘면 몇 경기를 쉬어야 해요.',p:.75,win:{fans:15,morale:5,rep:3},inj:[1,2]},
- {id:'rainold',title:'구형 머신으로 빗길 테스트',desc:'우천 감각을 기를 기회지만 차가 까다로워요.',p:.6,win:{stats:{wet:4}},inj:[1,1]},
- {id:'padel',title:'드라이버들과 파델 테니스',desc:'분위기는 최고지만 발목을 조심해야 해요.',p:.7,win:{morale:8,fans:3},inj:[1,1]},
- {id:'gt3',title:'가명으로 GT3 레이스 출전',desc:'휴식기에 몰래 내구 레이스에 나가 볼까요? 들키면 팀이 싫어해요.',p:.6,win:{stats:{race:2,wet:1},fans:6},slump:5},
- {id:'esports',title:'밤샘 온라인 심레이싱',desc:'프로게이머들과 24시간 가상 내구 레이스! 다음 레이스 컨디션이 걱정이에요.',p:.65,win:{stats:{quali:2},fans:5},slump:5},
- {id:'rallyx',title:'주말 랠리 출전',desc:'자갈길 감각은 끝내주지만 랠리는 정말 위험해요.',p:.6,win:{stats:{wet:3,consistency:2,race:1}},inj:[1,2]},
- {id:'cycle',title:'알프스 사이클 투어',desc:'체력은 확실히 오르지만 내리막 도로는 위험해요.',p:.7,win:{stats:{consistency:2},morale:4},inj:[1,1]},
- {id:'surf',title:'친구들과 서핑 여행',desc:'머리는 맑아지지만 파도는 만만치 않아요.',p:.75,win:{morale:10,stats:{mental:1}},inj:[1,1]},
- {id:'football',title:'친구들과 축구 시합',desc:'오랜만에 학교 친구들과 신나게 뛰어요. 그런데 발목을 다칠 수도 있어요.',p:.7,win:{morale:8,stats:{consistency:1}},inj:[1,1]},
- {id:'rentkart',title:'동네 렌탈 카트장 번개',desc:'카트 동호회 형들이랑 연습 레이스! 실력은 늘지만 부딪히기 쉬워요.',p:.65,win:{stats:{race:2}},inj:[1,1]},
- {id:'gamenight',title:'밤새 레이싱 게임 대회',desc:'친구들이랑 레이싱 게임 대회를 열었어요. 감은 좋아지지만 다음 날이 걱정이에요.',p:.65,win:{stats:{quali:2}},slump:3},
- {id:'trampoline',title:'트램펄린 파크',desc:'균형 감각 훈련이 된대요. 착지만 조심하면요.',p:.7,win:{stats:{mental:2,consistency:1}},inj:[1,1]}
+ {id:'boxing',title:'복싱으로 반사신경 키우기',ev:'복싱 훈련',p:.65,win:{stats:{mental:3,race:2}},inj:[1,1]},
+ {id:'mtb',title:'산악자전거로 지구력 훈련',ev:'산악자전거 훈련',p:.65,win:{stats:{consistency:3,tyre:2}},inj:[1,2]},
+ {id:'kart',title:'옛 라이벌들과 카트 레이스!',ev:'카트 레이스',p:.6,win:{stats:{race:3,quali:1}},inj:[1,1]},
+ {id:'simnight',title:'시뮬레이터로 밤샘 예선 연습',p:.6,win:{stats:{quali:3}},slump:6},
+ {id:'skydive',title:'스폰서랑 스카이다이빙 이벤트!',ev:'스카이다이빙',p:.75,win:{fans:15,morale:5,rep:3},inj:[1,2]},
+ {id:'rainold',title:'구형 머신으로 빗길 테스트',ev:'빗길 테스트',p:.6,win:{stats:{wet:4}},inj:[1,1]},
+ {id:'padel',title:'드라이버들과 파델 테니스',ev:'파델 테니스',p:.7,win:{morale:8,fans:3},inj:[1,1]},
+ {id:'gt3',title:'가명으로 몰래 GT3 레이스 출전',p:.6,win:{stats:{race:2,wet:1},fans:6},slump:5},
+ {id:'esports',title:'프로게이머들과 24시간 심레이싱',p:.65,win:{stats:{quali:2},fans:5},slump:5},
+ {id:'rallyx',title:'주말에 랠리 출전!',ev:'랠리',p:.6,win:{stats:{wet:3,consistency:2,race:1}},inj:[1,2]},
+ {id:'cycle',title:'알프스 사이클 투어',ev:'사이클 투어',p:.7,win:{stats:{consistency:2},morale:4},inj:[1,1]},
+ {id:'surf',title:'친구들과 서핑 여행',ev:'서핑',p:.75,win:{morale:10,stats:{mental:1}},inj:[1,1]},
+ {id:'football',title:'학교 친구들과 축구 시합',ev:'축구 시합',p:.7,win:{morale:8,stats:{consistency:1}},inj:[1,1]},
+ {id:'rentkart',title:'카트 동호회 형들이랑 레이스 연습!',ev:'카트 연습',p:.65,win:{stats:{race:2}},inj:[1,1]},
+ {id:'gamenight',title:'친구들이랑 밤새 레이싱 게임 대회',p:.65,win:{stats:{quali:2}},slump:3},
+ {id:'trampoline',title:'트램펄린 파크에서 균형 훈련',ev:'트램펄린',p:.7,win:{stats:{mental:2,consistency:1}},inj:[1,1]}
 ];
 // who can do which break: a 14-year-old karter doesn't play padel with F1 drivers
 const GA_REQ={boxing:{age:16},esports:{age:16},simnight:{age:15},kart:{min:'F3'},skydive:{min:'F2',age:18},rainold:{min:'F3'},padel:{min:'F1'},gt3:{min:'F2',age:18},rallyx:{age:17},cycle:{age:16},surf:{age:15},
@@ -1366,13 +1367,13 @@ function resolveGacha(go){
     applyEff({morale:-4});save();return{ok:false,t:`실패… 피로가 쌓여 다음 레이스 페이스가 떨어져요 · 체력 -10`}}
   const k=ri(...g.inj);let miss=0;
   for(let r=G.r;r<Math.min(Z.races,G.r+k);r++){const o=Z.orders[r];o.fin=o.fin.filter(x=>x!=='me');o.dnf=o.dnf.filter(x=>x!=='me');o.q=o.q.filter(x=>x!=='me');if(!Z.meAbsent.includes(r)){Z.meAbsent.push(r);miss++}}
-  applyEff({morale:-5});Z.ctx.ev.push(`${g.title.replace(' 해볼까요?','')} 중 부상으로 ${miss}경기를 결장했어요.`);save();
+  applyEff({morale:-5});Z.ctx.ev.push(`${g.ev} 중 부상으로 ${miss}경기를 결장했어요.`);save();
   return{ok:false,t:`부상! ${miss}경기 결장 · 체력 -11`};
 }
 function showGacha(){
   const Z=S.season,G=Z.gacha,g=GACHA.find(x=>x.id===G.id),box=document.getElementById('pInc');if(!box)return;
   const pct=Math.round(gachaP(g)*100),f1=Z.ctx.f1;
-  box.innerHTML=`<div class="sheet"><section class="card"><div class="eyebrow">${f1?'여름 휴식기':'시즌 중반 휴식기'} · 한 번의 도전</div><h3 class="h2">${esc(g.title)}</h3><p class="muted" style="margin:0">${esc(g.desc)}</p>
+  box.innerHTML=`<div class="sheet"><section class="card"><div class="eyebrow">${f1?'여름 휴식기':'시즌 중반 휴식기'} · 한 번의 도전</div><h3 class="h2">${esc(g.title)}</h3>
     <div class="kv"><div class="row"><span>성공 확률</span><span class="num" style="font-size:22px;color:var(--gold)">${pct}%</span></div>
     <div class="row"><span>성공하면</span><span class="up">${esc(effText(g.win))}</span></div>
     <div class="row"><span>실패하면</span><span class="down">${g.slump?'다음 레이스 부진':`부상 ${g.inj[0]===g.inj[1]?g.inj[0]:g.inj[0]+'~'+g.inj[1]}경기 결장`}</span></div></div>
@@ -2375,7 +2376,7 @@ function hofAdd(){if(!S||!S.p||!S.p.retired)return;S.cid??=Date.now()+'-'+Math.r
     peak:p.peak,jr:p.jr.length,trs:[...altTrophies(p).map(t=>t.n),...p.jr.map(j=>`${j.name} 챔피언`)]});
   hofSave(rkSort(a));rkPush()}
 /* ---------- anonymous play log (Google Apps Script -> Sheet) ---------- */
-const LOG_URL='https://script.google.com/macros/s/AKfycbwQLNST9m47Rbh9GRou9a2Yrl0L0cYt8ImopVt-ZC0TKSZcxVAWrTCNkuFCChwJuKIE/exec',LOG_VER='0.23.1',KEYL='k2wc-log-v1';
+const LOG_URL='https://script.google.com/macros/s/AKfycbwQLNST9m47Rbh9GRou9a2Yrl0L0cYt8ImopVt-ZC0TKSZcxVAWrTCNkuFCChwJuKIE/exec',LOG_VER='0.23.2',KEYL='k2wc-log-v1';
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 const logOff=()=>lsGet('k2wc-log-off')==='1';

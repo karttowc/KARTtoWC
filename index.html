@@ -523,11 +523,7 @@ button.hc{all:unset;box-sizing:border-box;font-size:12px;font-weight:700;padding
 .topnews .tn.reg{color:var(--gold);font-weight:700}
 .topnews .tn img{height:14px!important;vertical-align:-2px}
 .dot.yr{width:auto;min-width:44px;padding:0 6px;font-size:13px}
-.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.tch{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:var(--surface-2);border:1.5px solid transparent;min-width:0}
-.tch b{font-size:14px}.tch .tm{display:flex;flex-wrap:wrap;gap:4px}.tch i{font-style:normal;font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px}
-.tch i.u{background:rgba(240,68,82,.14);color:#FF8A94}.tch i.d{background:rgba(49,130,246,.14);color:#8CB8FF}
-.tch[aria-pressed="true"]{border-color:var(--accent);background:rgba(49,130,246,.12)}.tch[disabled]{opacity:.55;cursor:default}
+.item .body .bar{display:block;flex:none;height:6px;margin-top:7px}.item[disabled]{opacity:.5}
 .kv.st .row{flex-direction:column;align-items:flex-start;gap:3px}.kv.st .row>span:last-child{text-align:left}.kv.st .row>span:first-child{font-size:12px;font-weight:700;color:var(--accent)}.kv.st .row>span.up:first-child{color:var(--good)}.kv.st .row>span.down:first-child{color:#FF8A94}
 .leave.info{background:rgba(49,130,246,.1);border-color:rgba(49,130,246,.3);color:#9CC2FF}
 .leave{background:rgba(240,68,82,.12);border:1px solid rgba(240,68,82,.35);color:#FF9AA2;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600}
@@ -629,7 +625,7 @@ const B = {
     "max": -2.5
    }
   ],
-  "focus_multiplier": 1.5,
+  "focus_multiplier": 1.8, "rest_multiplier": 0.85,
   "max_focus_stats": 2,
   "no_race_multiplier": 0.5,
   "near_potential": {
@@ -1974,7 +1970,7 @@ function rivalLine(){const rv=S.rival;if(!rv)return'';
   return`<div class="rvline"><span class="rvb">라이벌</span><b>${esc(rv.name)}</b> · ${rv.f1&&rv.team?logo(rv.team,20)+esc(teamDef(rv.team).name):esc(rivalSeriesName(rv))} · OVR ${ovrOf(rv.stats)} <span>맞대결 ${rv.h2h[0]}:${rv.h2h[1]}</span></div>`}
 function newGame(o){
   const pot=Math.round(clamp(B.driver.potential.mean+gauss()*B.driver.potential.sd,B.driver.potential.min,B.driver.potential.max));
-  S={v:1,startYear:K.start_year,year:K.start_year,phase:'ready',
+  S={v:1,startYear:K.start_year,year:K.start_year,phase:'ready',train:'focus',
     teams:K.teams.map(t=>({id:t.id,name:t.name,short:t.short,color:t.color,machine:t.machine_2026,tier:t.tier})),
     f1:K.drivers.map(d=>({id:d.id,name:d.name,nationality:d.nationality,age:K.start_year-d.birth_year,team:d.team,style:d.style,potential:d.potential,stats:{...d.stats}})),
     p:{name:o.name,num:o.num,nat:o.nat,avatar:o.avatar??avDefault(o.nat),helmet:o.helmet,style:o.style,stats:{...o.stats},potential:Math.max(pot,ovrOf(o.stats)+15),focus:[...o.focus],
@@ -2159,7 +2155,7 @@ function finishSeason(){
   const ovrAfter=ovrOf(p.stats);p.peak=Math.max(p.peak,ovrAfter);
   const deltas=STATS.map(k=>({k,v:p.stats[k],d:p.stats[k]-statsBefore[k]})).filter(x=>x.d!==0);
   const rec={lk:p.series==='ALT'?p.alt:p.series,year:S.year,age:p.age,series:p.series==='ALT'?altDef(p.alt).name:seriesDef(p.series).name,sid:p.series,team:teamName,color:teamColor,role:p.role,
-    pos,field:fieldN,train:S.train?TRAIN.find(x=>x.id===S.train).name:null,points:me.pts,wins:me.wins,podiums:me.pod,poles:me.poles,dnf:me.dnf,starts:me.starts,ovrBefore,ovrAfter,h2h,titled,crown,first:!!C.firstLeague,slump:slump||null};
+    pos,field:fieldN,train:trName(),points:me.pts,wins:me.wins,podiums:me.pod,poles:me.poles,dnf:me.dnf,starts:me.starts,ovrBefore,ovrAfter,h2h,titled,crown,first:!!C.firstLeague,slump:slump||null};
   rec.rv=rvRes;
   if(C.why0&&pos&&me.starts>0){const fin=me.fp.filter(x=>x&&x<99).sort((a,b)=>a-b),med=fin.length?fin[Math.floor(fin.length/2)]:fieldN,P=B.race.points;
     const extra=me.dnf*(P[med-1]||0),myPts=me.pts+extra,rND=1+st.filter(e=>e!==me&&e.pts>myPts).length,W=C.why0;
@@ -2197,11 +2193,11 @@ function finishSeason(){
 function grow(p,played,poor){
   const band=B.driver.growth_by_age.find(b=>p.age>=b.from&&p.age<=b.to)||B.driver.growth_by_age.at(-1);
   const rsv=p.series==='F1'&&p.role==='reserve',base=rnd(band.min,band.max),mult=played?1:rsv?.85:B.driver.no_race_multiplier,ovr=ovrOf(p.stats);
-  const tr=S.train?TRAIN.find(x=>x.id===S.train):null;
+  const rest=S.train==='rest';
   const AD=B.driver.age_decline_by_stat||{};
   const GS=B.driver.growth_spread||[.6,1.4];
   STATS.forEach(k=>{let g=base*rnd(GS[0],GS[1]);if(g<0)g*=AD[k]??1;
-    if(g>0){g*=mult;if(p.focus.includes(k))g*=B.driver.focus_multiplier;if(tr)g*=tr.mult[k]||tr.mult.all||1;
+    if(g>0){g*=mult;if(rest)g*=B.driver.rest_multiplier;else if(p.focus.includes(k))g*=B.driver.focus_multiplier;
       if(ovr>=p.potential)g=0;else if(ovr>=p.potential-B.driver.near_potential.distance)g*=B.driver.near_potential.multiplier}
     p.stats[k]=clamp(p.stats[k]+sround(g),1,99)});
   // slump: bad seasons can cost a little even when young
@@ -2542,16 +2538,8 @@ function applyOffer(o){
   save();
 }
 
-/* ---------- preseason training ---------- */
-const TRAIN=[
- {id:'sim',name:'시뮬레이터 집중',desc:'예선 한 바퀴를 수백 번 돌려요. 예선 페이스가 빨리 자라요.',mult:{quali:1.8}},
- {id:'longrun',name:'롱런 프로그램',desc:'레이스 거리 주행으로 타이어와 일관성을 다듬어요.',mult:{tyre:1.6,consistency:1.4}},
- {id:'craft',name:'휠투휠 세션',desc:'추월과 방어 상황을 반복 연습해요.',mult:{race:1.8}},
- {id:'rain',name:'빗길 특훈',desc:'젖은 트랙에서만 달려요. 우천 능력이 크게 자라요.',mult:{wet:2}},
- {id:'mind',name:'멘탈 코칭',desc:'압박 속 판단력을 기르는 훈련이에요.',mult:{mental:1.6,consistency:1.3}},
- {id:'balance',name:'균형 훈련',desc:'모든 능력치를 고르게 올려요.',mult:{all:1.15}},
- {id:'rest',name:'휴식과 회복',desc:'성장은 조금 느려지지만 매 프리시즌 체력이 크게 회복돼요.',mult:{all:.85},eff:{morale:15}}
-];
+/* ---------- preseason training: pick up to 2 stats, or rest ---------- */
+const trName=()=>S.train==='rest'?'휴식':S.p.focus.map(k=>LBL[k]).join(', ')||'-';
 /* ---------- race incidents ---------- */
 const INC=[
  {id:'rain',title:'갑자기 비가 내리기 시작했어요',desc:'트랙이 빠르게 젖고 있어요. 지금 결정해야 해요.',choices:[
@@ -2889,7 +2877,6 @@ function tone(s,o={}){
 /* ---------- reactions: expert + fans ---------- */
 function ieyo(w){const c=w.charCodeAt(w.length-1)-0xAC00;return c>=0&&c<11172&&c%28?'이에요':'예요'}
 function josa(w){const c=w.charCodeAt(w.length-1)-0xAC00;return c>=0&&c<11172&&c%28?'을':'를'}
-const TRAIN_FOR={quali:'시뮬레이터 집중',race:'휠투휠 세션',tyre:'롱런 프로그램',wet:'빗길 특훈',mental:'멘탈 코칭',consistency:'롱런 프로그램'};
 const NICKS=['새벽알람','피트레인직관러','타이어요정','DRS열어','언더컷장인','입문3년차','헬멧수집가','패독고양이','세이프티카','블루플래그','체커기','예선덕후','풀웻파','부산f1팬','대전레이싱'];
 const PLAT=['커뮤니티','SNS','영상 댓글','팬카페'];
 const FAN={
@@ -3052,7 +3039,7 @@ function buildReact(R,x){
   if(!f&&R.pos)f=pick(['큰 변수 없이 실력대로 나온 시즌이었어요.','눈에 띄는 변수 없이 꾸준히 달렸어요.']);
   if(f)E.push(f);
   // 4) what next
-  const st=p.stats,rs0=recStats()[0],weak=rs0.k,tr=TRAIN_FOR[weak],dO=R.ovrAfter-R.ovrBefore,trTxt=S.train&&TRAIN.find(z=>z.id===S.train).name===tr?'지금 훈련 방향이 맞아요.':`${tr}${josa(tr)} 추천해요.`;
+  const st=p.stats,rs0=recStats()[0],weak=rs0.k,dO=R.ovrAfter-R.ovrBefore,trTxt=S.train!=='rest'&&p.focus.includes(weak)?'지금 훈련 방향이 맞아요.':`훈련 계획에서 ${LBL[weak]}${josa(LBL[weak])} 골라 보세요.`;
   let adv,pre='';
   if(dO<0)pre=R.slump&&R.slump!=='random'&&R.age<33?`OVR이 ${dO} 떨어졌어요. ${R.slump==='tired'?'체력이 바닥난 탓':R.slump==='norace'?'실전 감각이 떨어진 탓':'부진이 자신감을 흔든 탓'}이라 일시적이에요. `:R.age>=33?`OVR이 ${dO} 떨어졌어요. 나이에 따른 하락이 시작됐어요. `:`OVR이 ${dO} 떨어졌지만 일시적인 부진이에요. `;
   else if(dO>=4)pre=`OVR이 +${dO} 오르며 한 단계 성장했어요. `;
@@ -3149,18 +3136,17 @@ function readyCard(){
   if(p.series==='F1'&&p.role==='race'){const t=teamDef(p.team.id),mate=S.f1.find(d=>d.team===t.id);desc=`${K.series.find(s=>s.id==='F1').races}R${mate?' · 팀메이트 '+esc(mate.name):''}`}
   else if(p.series==='F1')desc='리저브 · 주전이 빠지면 대타 출전';
   else{const sd=p.series==='ALT'?altDef(p.alt):seriesDef(p.series);desc=`${sd.races}R · ${TIER_LBL[c.tier]}`}
-  const tr=S.train?TRAIN.find(x=>x.id===S.train):null,n=S.events.length;
+  const n=S.events.length,mxF=S.train!=='rest'&&p.focus.find(k=>p.stats[k]>=99);
   const row=(attr,ic,title,sub,hot)=>`<button class="trow${hot?' need':''}" type="button" ${attr}><span class="ti">${ic}</span><span class="tb"><b>${title}</b><span>${sub}</span></span><span class="ta">›</span></button>`;
   return`<section class="card prep"><div><h2 class="h3" style="font-size:20px;margin:0">${S.year} 시즌 준비</h2><span class="muted" style="font-size:13px">${desc}</span></div>
     ${rivalLine()}
     <div class="tlist">
-      ${row('data-sheet="train"','훈련','훈련 계획',!tr?'아직 안 골랐어요':trainOpen()?`${esc(tr.name)} · 훈련 계획을 바꿀 수 있어요`:`${esc(tr.name)} · ${S.trainYear+TRAIN_LOCK}년에 변경 가능`,!tr||trainOpen())}
-      ${row('data-sheet="focus"','집중','집중 육성',(p.focus.map(k=>LBL[k]).join(', ')||'없음')+' · 추천: '+recStats().map(r=>LBL[r.k]).join(', '),0)}
+      ${row('data-sheet="train"','훈련','훈련 계획',S.train==='rest'?'이번 시즌 휴식 · 체력 회복':mxF?`${LBL[mxF]} 최대치! 다른 능력치를 골라 보세요`:`${trName()} · 추천: ${recStats().map(r=>LBL[r.k]).join(', ')}`,!!mxF||(S.train!=='rest'&&!p.focus.length))}
       ${n?row('data-sheet="ev0"','결정',`결정할 일 ${n}개`,esc(evDef(S.events[0].id).title)+(n>1?' 외':''),1):''}
       ${S.challenge?row('data-sheet="ch"','★',`${S.challenge.name} 출전 제안`,'선택 · 도전 이벤트',0):''}
       ${p.series==='F1'&&p.role==='race'?(p.xfer===S.year?`<div class="trow"><span class="ti" style="background:#3A1E22;color:#FF8A94">이적</span><span class="tb"><b>이적 요청 중</b><span>시즌 뒤 다른 팀들이 평가해요</span></span></div>`:row('data-sheet="xfer"','이적','이적 요청하기','선택 · 다른 팀으로 가고 싶다고 선언',0)):''}
     </div>
-    <button class="btn" type="button" id="playBtn">${!tr?'훈련 계획부터 골라 주세요':n?`결정하고 시즌 시작 (${n})`:`${S.year} 시즌 시작`}</button></section>`;
+    <button class="btn" type="button" id="playBtn">${n?`결정하고 시즌 시작 (${n})`:`${S.year} 시즌 시작`}</button></section>`;
 }
 function standRows(){const st=S.last.standings;
   return[...st,...(S.last.meRow?[S.last.meRow]:[])].map(e=>`<tr class="${e.me?'me':''}"><td class="num" style="width:28px">${e.pos}</td><td>${e.team&&teamByShort(e.team)?logo(teamByShort(e.team).id,24):''}${esc(e.name)}</td><td class="muted">${esc(e.team||'')}</td><td class="r num">${e.pts}</td></tr>`).join('')}
@@ -3291,7 +3277,7 @@ function driverTab(){
   const dl=(S.phase==='result'||S.phase==='offers')&&S.last&&S.last.deltas?Object.fromEntries(S.last.deltas.map(x=>[x.k,x.d])):null;
   const p=S.p,st=B.styles.find(s=>s.id===p.style),ac=p.academy?K.academies.find(a=>a.id===p.academy):null;
   return`<header class="top"><h1>드라이버</h1><button class="iconbtn" type="button" data-sheet="helmet">헬멧 꾸미기</button></header>${profileCard()}
-  <section class="card"><div class="row"><h3 class="h3">능력치</h3><button class="infobtn" type="button" data-sheet="focus" style="font-size:12px">집중: ${p.focus.map(k=>LBL[k]).join(', ')||'없음'} ›</button></div>
+  <section class="card"><div class="row"><h3 class="h3">능력치</h3><button class="infobtn" type="button" data-sheet="train" style="font-size:12px">훈련: ${trName()} ›</button></div>
     ${STATS.map(k=>`<div class="statrow${dl?' dl':''}"><span${p.focus.includes(k)?' style="color:var(--accent)"':''}>${LBL[k]} <button class="ibtn" type="button" data-sheet="st_${k}" aria-label="${LBL[k]} 설명"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor" opacity=".18"/><circle cx="10" cy="10" r="8.25" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="6.2" r="1.25" fill="currentColor"/><rect x="9" y="8.6" width="2" height="6" rx="1" fill="currentColor"/></svg></button></span><div class="bar"><i style="width:${p.stats[k]}%"></i></div><b>${p.stats[k]}</b>${dl?`<em class="${(dl[k]||0)>0?'up':(dl[k]||0)<0?'dn':''}">${dl[k]?(dl[k]>0?'+':'')+dl[k]:''}</em>`:''}</div>`).join('')}</section>
   ${scoutCard()}
   <section class="card kv">
@@ -3646,8 +3632,8 @@ function obView(){
     <button class="btn" type="button" id="obNext2" ${ob.style?'':'disabled'}>이 스타일로 할게요</button>`;
   const st=ob.cands[ob.style];
   return`<header class="top"><button class="iconbtn" type="button" id="obBack">이전</button>${steps}<span style="width:56px"></span></header>
-    <div><div class="eyebrow">${B.styles.find(s=>s.id===ob.style).name} · OVR ${ovrOf(st)}</div><h2 class="h2">집중해서 키울 능력치를<br>골라 주세요</h2>
-    <p class="muted" style="margin:6px 0 0">최대 ${B.driver.max_focus_stats}개까지 고를 수 있어요. 고른 능력치가 훨씬 빨리 자라요.</p></div>
+    <div><div class="eyebrow">${B.styles.find(s=>s.id===ob.style).name} · OVR ${ovrOf(st)}</div><h2 class="h2">훈련으로 키울 능력치를<br>골라 주세요</h2>
+    <p class="muted" style="margin:6px 0 0">최대 ${B.driver.max_focus_stats}개까지 고를 수 있어요. 고른 능력치가 훨씬 빨리 자라요. 매 시즌 준비 때 훈련 계획에서 바꿀 수 있어요.</p></div>
     <section class="card"><div class="list">${STATS.map(k=>`<button class="item" type="button" data-focus="${k}" aria-pressed="${ob.focus.includes(k)}"><span class="body"><b>${LBL[k]}</b></span><span class="num" style="font-size:20px;color:var(--muted)">${st[k]}</span><span class="tick"></span></button>`).join('')}</div></section>
     <button class="btn" type="button" id="obDone" ${ob.focus.length?'':'disabled'}>드라이버 만들기</button>`;
 }
@@ -3669,7 +3655,7 @@ function hofAdd(){if(!S||!S.p||!S.p.retired)return;S.cid??=Date.now()+'-'+Math.r
     peak:p.peak,jr:p.jr.length,trs:[...altTrophies(p).map(t=>t.n),...p.jr.map(j=>`${j.name} 챔피언`)]});
   hofSave(rkSort(a));rkPush()}
 /* ---------- anonymous play log (Google Apps Script -> Sheet) ---------- */
-const LOG_URL='https://script.google.com/macros/s/AKfycbwQLNST9m47Rbh9GRou9a2Yrl0L0cYt8ImopVt-ZC0TKSZcxVAWrTCNkuFCChwJuKIE/exec',LOG_VER='0.24.2',KEYL='k2wc-log-v1';
+const LOG_URL='https://script.google.com/macros/s/AKfycbwQLNST9m47Rbh9GRou9a2Yrl0L0cYt8ImopVt-ZC0TKSZcxVAWrTCNkuFCChwJuKIE/exec',LOG_VER='0.25.0',KEYL='k2wc-log-v1';
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 const logOff=()=>lsGet('k2wc-log-off')==='1';
@@ -3886,7 +3872,7 @@ function celebrate(R,done){
   document.body.appendChild(el);
   el.querySelector('button').addEventListener('click',()=>{el.classList.add('bye');setTimeout(()=>{el.remove();done&&done()},250)});
 }
-let chainSeen={},trPick=null,sheetBack=null;
+let chainSeen={},sheetBack=null;
 const PRE=s=>typeof s==='string'&&(/^ev\d/.test(s)||s==='train'||s==='ch');
 const INFO=s=>typeof s==='string'&&/^(st_|skip_|acad_)/.test(s);
 function openSheet(s){if(INFO(s)&&PRE(sheet))sheetBack=sheet;sheet=s;render()}
@@ -3897,18 +3883,16 @@ function peekHide(){const d=document.getElementById('peek');if(d)d.remove()}
 if(typeof document.addEventListener==='function'){document.addEventListener('pointerdown',e=>{if(e.target.closest('.peekbtn')){e.preventDefault();peekShow()}});
 ['pointerup','pointercancel','blur'].forEach(ev=>window.addEventListener(ev,peekHide));
 document.addEventListener('contextmenu',e=>{if(e.target.closest('.peekbtn'))e.preventDefault()});}
-// a training plan is locked in for 3 seasons
-const TRAIN_LOCK=3,trainOpen=()=>!S.train||S.trainYear==null||S.year-S.trainYear>=TRAIN_LOCK;
+// the training plan shows up every preseason so it never gets forgotten
 function nextStep(){const p=S.p;
-  if(!S.train){sheet='train';render();return}
-  if(trainOpen()&&!chainSeen.tr){chainSeen.tr=1;sheet='train';render();return}
+  if(!chainSeen.tr){chainSeen.tr=1;sheet='train';render();return}
   if(S.events.length){sheet='ev0';render();return}
   if(S.challenge&&!chainSeen.ch){chainSeen.ch=1;sheet='ch';render();return}
   sheet='go';render()}
-function goSheet(){const p=S.p,tr=S.train?TRAIN.find(x=>x.id===S.train):null,picked=(S.evSeason||[]).map(e=>{const d=evDef(e.id);return d?d.choices[e.j].label:null}).filter(Boolean);
+function goSheet(){const p=S.p,picked=(S.evSeason||[]).map(e=>{const d=evDef(e.id);return d?d.choices[e.j].label:null}).filter(Boolean);
   const row=(k,v)=>`<div class="row"><span>${k}</span><span>${v}</span></div>`;
   return`<div class="sheet" id="sheetBg"><section class="card"><div class="eyebrow">${S.year} 시즌</div><h3 class="h2">준비 완료!</h3>
-    <div class="kv">${row('훈련',tr?esc(tr.name):'-')}${picked.length?row('결정',picked.map(esc).join('<br>')):''}
+    <div class="kv">${row('훈련',esc(trName()))}${picked.length?row('결정',picked.map(esc).join('<br>')):''}
       ${S.chTxt?row('도전',esc(S.chTxt)):''}
       ${p.series==='F1'&&p.role==='race'?row('이적 요청',p.xfer===S.year?'<span style="color:#FF8A94">요청함</span>':'안 함'):''}
       ${row('체력',`<b class="num">${p.morale}</b>${p.morale<40?' <span style="color:var(--bad)">(지침 · 실수 위험)</span>':''}`)}</div>
@@ -4081,11 +4065,11 @@ function sheetView(){
       ${e.choices.map((c,j)=>`<button class="choice" type="button" data-choose="${i}:${j}" aria-pressed="${evPick===j}" style="background:var(--surface-2)"><span class="row"><span class="h3">${esc(c.label)}</span><span class="tick">✓</span></span>${effChips(c.eff)}${c.risk?`<span class="muted" style="font-size:12px;color:var(--bad)">⚠ ${Math.round(c.risk.p*100)}% 확률로 사고</span>`:''}</button>`).join('')}
       <button class="btn" type="button" id="evNext" data-i="${i}" ${evPick==null?'disabled':''}>${chain?'다음':'결정하기'}</button>
       ${chain?'':'<button class="btn ghost" type="button" id="closeSheet">닫기</button>'}</section></div>`}
-  if(sheet==='train'){const can=S.phase==='ready'&&trainOpen();
-    return`<div class="sheet" id="sheetBg"><section class="card" style="max-height:85vh;overflow:auto"><div class="eyebrow">${esc(S.p.name)} · 프리시즌</div>${PEEK}<h3 class="h2">훈련 계획</h3><p class="muted" style="margin:0">${!S.train?'고른 계획은 3시즌 동안 유지돼요.':can?'<b style="color:var(--accent)">훈련 계획을 바꿀 수 있어요.</b> 고르면 다시 3시즌 동안 유지돼요.':`지금 계획은 ${S.trainYear+TRAIN_LOCK}년 프리시즌에 바꿀 수 있어요.`}</p>
-      ${(()=>{const r=recStats()[0];return`<p style="margin:0;font-size:13px"><span class="chip blue" style="font-size:11px;padding:2px 7px">추천</span> <b>${esc(TRAIN_FOR[r.k])}</b> · ${LBL[r.k]} ${S.p.stats[r.k]} — ${r.why}</p>`})()}<div class="tgrid">${TRAIN.map(x=>`<button class="tch" type="button" data-train="${x.id}" aria-pressed="${(trPick||S.train)===x.id}" ${can?'':'disabled'}><b>${esc(x.name)}${x.name===TRAIN_FOR[recStats()[0].k]?' <span class="chip blue" style="font-size:10px;padding:1px 6px">추천</span>':''}</b><span class="tm">${Object.entries(x.mult).map(([k,v])=>`<i class="${v>=1?'u':'d'}">${k==='all'?'전체':LBL[k]} ×${v}</i>`).join('')}${x.eff&&x.eff.morale?`<i class="u">체력 +${x.eff.morale}</i>`:''}</span></button>`).join('')}</div>
-      ${chain?`<button class="btn" type="button" id="trNext" ${(trPick||S.train)?'':'disabled'}>다음</button>`:can?`<button class="btn" type="button" id="trOk" ${(trPick||S.train)?'':'disabled'}>이 계획으로 결정</button>`:''}
-      ${chain?'':'<button class="btn ghost" type="button" id="closeSheet">닫기</button>'}</section></div>`}
+  if(sheet==='train'){const p=S.p,can=S.phase==='ready',rest=S.train==='rest',RS=recStats(),C='font-size:11px;padding:2px 7px';
+    return`<div class="sheet" id="sheetBg"><section class="card" style="max-height:85vh;overflow:auto"><div class="eyebrow">${esc(p.name)} · 프리시즌</div><h3 class="h2">훈련 계획</h3><p class="muted" style="margin:0">${can?`키울 능력치를 ${B.driver.max_focus_stats}개까지 골라요. 고른 능력치가 훨씬 빨리 자라요. 매 시즌 바꿀 수 있어요.`:'시즌 준비 단계에서 바꿀 수 있어요.'}</p>
+      <div class="list">${STATS.map(k=>{const r=RS.find(x=>x.k===k),mx=p.stats[k]>=99,on=!rest&&p.focus.includes(k);return`<button class="item" type="button" data-focus2="${k}" aria-pressed="${on}" ${can&&(!mx||on)?'':'disabled'}><span class="body"><b>${LBL[k]}${mx?` <span class="chip red" style="${C}">최대</span>`:r?` <span class="chip blue" style="${C}">추천</span>`:''}</b>${mx?'<span>더 오르지 않아요. 다른 능력치를 골라 보세요</span>':r?`<span>${r.why}</span>`:''}<span class="bar"><i style="width:${p.stats[k]}%"></i></span></span><span class="num" style="font-size:20px;color:var(--muted)">${p.stats[k]}</span><span class="tick"></span></button>`}).join('')}
+        <button class="item" type="button" data-rest="1" aria-pressed="${rest}" ${can?'':'disabled'}><span class="body"><b>이번 시즌은 휴식</b><span>성장이 조금 느려지고, 다음 프리시즌에 체력 +15 (지금 ${p.morale})</span></span><span class="tick"></span></button></div>
+      ${chain?`<button class="btn" type="button" id="trNext" ${rest||p.focus.length?'':'disabled'}>다음</button>`:'<button class="btn" type="button" id="closeSheet">완료</button>'}</section></div>`}
   if(sheet==='ch'&&S.challenge){const ovr=ovrOf(S.p.stats);
     return`<div class="sheet" id="sheetBg"><section class="card"><div class="eyebrow">도전 이벤트 · 선택 사항</div>${PEEK}<h3 class="h2">${S.challenge.name} 출전 제안</h3>
       <p class="muted" style="margin:0">F1 시즌 사이에 한 번 출전해요. 체력이 꽤 깎이지만 인기와 평판이 올라요. ${S.challenge.id==='LEMANS'?'모나코, 인디 500과 함께 트리플 크라운의 한 조각이에요.':'르망, 모나코와 함께 트리플 크라운의 한 조각이에요.'}</p>
@@ -4115,10 +4099,6 @@ function sheetView(){
       <div class="grid2" style="grid-template-columns:1fr 1fr"><button class="btn ghost" type="button" id="closeSheet">닫기</button><button class="btn" type="button" data-pickoffer="${sheet.i}">이 제안 선택</button></div></section></div>`}
   if(sheet==='helmet')return`<div class="sheet" id="sheetBg"><section class="card" style="max-height:88vh;overflow:auto"><div class="row"><h3 class="h2">헬멧 꾸미기</h3><button class="iconbtn" type="button" id="hRandom">랜덤</button></div>
       <div class="row" style="justify-content:center">${helmet(S.p.helmet,S.p.num,150)}</div>${helmetEditor(S.p.helmet)}<button class="btn" type="button" id="closeSheet">완료</button></section></div>`;
-  if(sheet==='focus'){const p=S.p,can=S.phase==='ready';
-    return`<div class="sheet" id="sheetBg"><section class="card"><h3 class="h2">집중 육성</h3><p class="muted" style="margin:0">${can?`최대 ${B.driver.max_focus_stats}개. 시즌 전에만 바꿀 수 있어요.`:'시즌 준비 단계에서 바꿀 수 있어요.'}</p>
-      <div class="list">${(()=>{const R=recStats();return STATS.map(k=>{const r=R.find(x=>x.k===k);return`<button class="item" type="button" data-focus2="${k}" aria-pressed="${p.focus.includes(k)}" ${can?'':'disabled'}><span class="body"><b>${LBL[k]}${r?' <span class="chip blue" style="font-size:11px;padding:2px 7px">추천</span>':''}</b>${r?`<span>${r.why}</span>`:''}</span><span class="num" style="font-size:20px;color:var(--muted)">${p.stats[k]}</span><span class="tick"></span></button>`}).join('')})()}</div>
-      <button class="btn" type="button" id="closeSheet">완료</button></section></div>`}
   return menuSheet();
 }
 function menuSheet(){
@@ -4174,7 +4154,6 @@ root.addEventListener('click',e=>{
   if(id==='goSeason'){chain=false;sheet=null;S.logPre={morale:S.p.morale,ch:S.challenge?S.challenge.id+':'+(S.chTxt?'go':'no'):null};S.chTxt=null;startSeason();render();window.scrollTo(0,0);return}
   if(id==='xferNo'){if(chain){nextStep();return}sheet=null;render();return}
   if(false){startSeason();render();window.scrollTo(0,0);return}
-  if(d.train&&S.phase==='ready'){if(!trainOpen())return;trPick=d.train;render();return}
   if(d.gacha&&S.phase==='progress'&&S.season.gacha&&!S.season.gacha.done){
     const box=document.getElementById('pInc');const go=d.gacha==='go';
     if(go)box.querySelector('.card').innerHTML='<div class="eyebrow">결과를 기다리는 중</div><h3 class="h2">두근두근…</h3>';
@@ -4194,16 +4173,15 @@ root.addEventListener('click',e=>{
   if(d.go){tab=d.go;sheet=null;render();window.scrollTo(0,0);return}
   if(d.sheet){openSheet(d.sheet);return}
   if(d.choose){evPick=+d.choose.split(':')[1];render();return}
-  if(id==='trNext'||id==='trOk'){if(trainOpen()){const pick=trPick||S.train;if(!pick)return;const prev=S.train;S.train=pick;S.trainYear=S.year;
-      const tr=TRAIN.find(x=>x.id===pick);toast(prev&&prev!==pick?`${tr.name}으로 바꿨어요 · 3시즌 동안 유지돼요`:`${tr.name} · 3시즌 동안 유지돼요`)}
-    trPick=null;save();if(id==='trNext'){nextStep();return}sheet=null;render();return}
+  if(id==='trNext'){save();nextStep();return}
   if(id==='evNext'&&evPick!=null){const i=+d.i,j=evPick,e=evDef(S.events[i].id),c=e.choices[j];evPick=null;let msg=applyEff(c.eff);
     let rk=null;if(c.risk&&Math.random()<c.risk.p){rk=c.risk.msg;msg=msg+' · '+applyEff(c.risk.eff)}
     S.evSeason=[...(S.evSeason||[]),{id:e.id,j}];S.events.splice(i,1);save();if(c.risk)bigToast(c.label,msg,rk||'다행히 아무 일도 없었어요');if(chain){nextStep();return}sheet=null;render();return}
   if(id==='acceptCh'){const m=runChallenge();S.chTxt=m;sheet={type:'chres',c:S.p.challenges.at(-1)};render();return}
   if(id==='chDone'){sheet=null;if(chain){nextStep();return}render();return}
   if(id==='declineCh'){S.challenge=null;save();if(chain){nextStep();return}sheet=null;render();return}
-  if(d.focus2&&S.phase==='ready'){const k=d.focus2,p=S.p;if(p.focus.includes(k))p.focus=p.focus.filter(x=>x!==k);else{if(p.focus.length>=B.driver.max_focus_stats){const out=p.focus.shift();toast(`${LBL[out]} 대신 ${LBL[k]}에 집중해요`)}p.focus.push(k)}save();render();return}
+  if(d.rest&&S.phase==='ready'){S.train=S.train==='rest'?'focus':'rest';save();render();return}
+  if(d.focus2&&S.phase==='ready'){const k=d.focus2,p=S.p;if(S.train==='rest'){S.train='focus';if(!p.focus.includes(k))p.focus.push(k);if(p.focus.length>B.driver.max_focus_stats)p.focus.shift()}else if(p.focus.includes(k))p.focus=p.focus.filter(x=>x!==k);else{if(p.focus.length>=B.driver.max_focus_stats){const out=p.focus.shift();toast(`${LBL[out]} 대신 ${LBL[k]}에 집중해요`)}p.focus.push(k)}save();render();return}
   if(id==='askRetire'){sheet='retire';render();return}
   if(id==='confirmRetire'){sheet=null;retireNow();render();window.scrollTo(0,0);return}
   if(id==='skipProg'){finishProgress();return}
@@ -4223,7 +4201,7 @@ root.addEventListener('click',e=>{
   if(id==='logDl'){logDownload();return}
   if(id==='logToggle'){if(logOff())lsSet('k2wc-log-off','0');else{lsSet('k2wc-log-off','1');lsSet(KEYL,'[]')}render();return}
   if(id==='toTitle'){sheet=null;title=true;render();window.scrollTo(0,0);return}
-  if(id==='closeSheet'){if(sheetBack){sheet=sheetBack;sheetBack=null;render();return}sheet=null;chain=false;evPick=null;trPick=null;render();return}
+  if(id==='closeSheet'){if(sheetBack){sheet=sheetBack;sheetBack=null;render();return}sheet=null;chain=false;evPick=null;render();return}
   if(id==='askNew'){sheet='confirm';render();return}
   if(id==='cancelNew'){sheet='menu';render();return}
   if(id==='confirmNew'){S=null;sheet=null;try{localStorage.removeItem(KEY)}catch(_){}ob=null;render();return}
@@ -4243,7 +4221,7 @@ document.getElementById('importFile').addEventListener('change',e=>{
   rd.readAsText(f);e.target.value='';
 });
 
-S=load();if(S){const p=S.p;avatarCanvas(pAv(p),p.helmet,true);if(S.jr===undefined){if(S.year<=K.start_year+1&&!p.retired)initJrPool();else S.jr=[]}S.f1.forEach(d=>{if(d.name==='이삭 하자르')d.name='아이작 하자르'});if(S.rival&&!S.rival.nm2){const nn=genName(S.rival.nat);S.f1.forEach(d=>{if(d.id==='rival')d.name=nn});S.rival.name=nn;S.rival.nm2=1}
+S=load();if(S){const p=S.p;if(S.train!=='rest')S.train='focus';avatarCanvas(pAv(p),p.helmet,true);if(S.jr===undefined){if(S.year<=K.start_year+1&&!p.retired)initJrPool();else S.jr=[]}S.f1.forEach(d=>{if(d.name==='이삭 하자르')d.name='아이작 하자르'});if(S.rival&&!S.rival.nm2){const nn=genName(S.rival.nat);S.f1.forEach(d=>{if(d.id==='rival')d.name=nn});S.rival.name=nn;S.rival.nm2=1}
   S.f1.forEach(d=>{if(d.rookie&&!d.nm2){d.name=genName(d.nationality);d.nm2=1}});[...S.f1,...(S.jr||[]),...(S.rival?[S.rival]:[])].forEach(d=>{if(/니에미/.test(d.name))d.name=genName(d.nationality||d.nat)});if(!p.scout&&!p.retired)scoutInit(p);{const rd=S.f1.find(d=>d.id==='rival');if(rd)rd.id='ex'+Date.now()}S.rival=null;p.fans??=10;p.morale??=60;p.repBonus??=0;if(p.val==null){p.val=0;p.valPeak=0}p.challenges??=[];p.monaco??=false;S.events??=[];S.challenge??=null;S.news??=null;S.train??=null;S.react??=null;S.vacancies??=[];if(S.phase==='progress'&&!S.season)S.phase='result';if(S.news&&!S.news.heads)S.news=null;S.notice??=null;p.contract??=null;p.helmet=normHelmet(p.helmet)}render();
 (async()=>{try{if(window.claude&&window.claude.use){DL=await window.claude.use('downloads');if(DL)render()}}catch(_){}})();
 document.fonts&&document.fonts.ready.then(()=>{if(S&&S.p.retired)render()});

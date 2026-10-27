@@ -83,7 +83,7 @@
     "max": -2.5
    }
   ],
-  "focus_multiplier": 1.5,
+  "focus_multiplier": 1.8, "rest_multiplier": 0.85,
   "max_focus_stats": 2,
   "no_race_multiplier": 0.5,
   "near_potential": {

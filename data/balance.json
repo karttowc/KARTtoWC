@@ -272,7 +272,8 @@
   "academy": {
    "keep_top_fraction": 0.33,
    "warn_bottom_fraction": 0.33,
-   "expel_after_bad_seasons": 2
+   "expel_after_bad_seasons": 2,
+   "promote_chance": 0.5
   },
   "skip_offer": "rookie_champion",
   "f2_max_seasons": 3,

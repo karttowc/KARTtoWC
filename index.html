@@ -152,7 +152,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .hopt[aria-pressed="true"]{border-color:var(--accent)}
 .obhero{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:4px 16px;border-radius:20px;background:radial-gradient(120% 90% at 30% 20%,#2a3550 0%,#171a22 70%);box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .obhero .helmet{background:none}
-.avfull{display:block;width:auto;image-rendering:pixelated;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
+.avfull{display:block;width:auto;max-width:none;flex:none;image-rendering:pixelated;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
 .avface{flex:none;position:relative;overflow:hidden;border-radius:16px;background:var(--surface-2)}
 .avface img{position:absolute;left:50%;top:5%;width:84%;transform:translateX(-50%);image-rendering:pixelated}
 .avgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -3595,8 +3595,8 @@ function obView(){
     <section class="card"><div class="grid2"><label class="lbl" for="obName">이름<input class="field" id="obName" maxlength="12" placeholder="이름" value="${esc(ob.name)}"></label>
       <label class="lbl" for="obNum">차량 번호<input class="field num" id="obNum" type="number" min="2" max="99" value="${ob.num}"></label></div>
       <label class="lbl" for="obNat">국적<select class="field" id="obNat">${Object.entries(K.nationalities).map(([k,v])=>`<option value="${k}"${k===ob.nat?' selected':''}>${v}</option>`).join('')}</select></label></section>
-    <section class="card"><div class="h3" style="margin:0">드라이버</div><div class="avgrid">${AVATAR.map((_,i)=>`<button class="avopt" type="button" data-av="${i}" aria-pressed="${i===ob.av}" aria-label="드라이버 ${i+1}">${avatar(i,ob.helmet,64)}</button>`).join('')}</div></section>
-    <section class="card"><div class="h3" style="margin:0">헬멧 꾸미기</div><p class="muted" style="margin:-6px 0 0;font-size:13px">슈트 색도 헬멧 색을 따라가요.</p>${helmetEditor(ob.helmet)}
+    <section class="card"><div class="h3" style="margin:0">헬멧 꾸미기</div><p class="muted" style="margin:-6px 0 0;font-size:13px">슈트 색도 헬멧 색을 따라가요.</p>${helmetEditor(ob.helmet)}</section>
+    <section class="card"><div class="h3" style="margin:0">드라이버</div><div class="avgrid">${AVATAR.map((_,i)=>`<button class="avopt" type="button" data-av="${i}" aria-pressed="${i===ob.av}" aria-label="드라이버 ${i+1}">${avatar(i,ob.helmet,64)}</button>`).join('')}</div>
     </section><button class="btn" type="button" id="obNext1" ${ob.name.trim()?'':'disabled'}>다음</button><p class="muted" style="margin:4px 0 0;font-size:12px;text-align:center">비공식 팬 게임이에요. 수익을 내지 않으며 F1·FIA·각 팀과 관련이 없어요. 팀명·로고·선수명 등 상표는 각 소유자의 것이에요.</p>`;
   if(ob.step===2)return`<header class="top"><button class="iconbtn" type="button" id="obBack">이전</button>${steps}<span style="width:56px"></span></header>
     <div><div class="eyebrow">네 후보 모두 능력치 합은 ${B.driver.start_stat_sum}이고, 분포만 달라요.</div><h2 class="h2">드라이버 스타일을 골라 주세요</h2></div>

@@ -28,6 +28,8 @@ data/balance.json        밸런스 숫자 (성장, 레이스 가중치, F1 시�
 data/skin_f1_2026.json   팀·선수·시리즈 데이터. 팀 로고가 base64로 들어 있어 큼 → 통째로 Read 하지 말 것
 data/series_logos.json   리그 로고(base64) → 읽지 말 것
 data/trophies.json       트로피 그림(base64, 찬우가 준 이미지) → 읽지 말 것
+data/avatars.json        드라이버 아바타 12종(base64). 원본 data/avatars_src/, tools/avatars.py로 생성 → 읽지 말 것
+data/helmets.json        헬멧 패턴 8종(base64). 원본 data/helmets_src/, tools/helmets.py로 생성 → 읽지 말 것
 tools/build.py           template + data → index.html, build/game.js
 tools/test_render.js     모든 화면 렌더 스모크 테스트 ("render ok" 나오면 통과)
 tools/test_balance.js    300커리어 시뮬 (약 100초). 마지막 줄: F1 debut / champ1+ / champ5+
@@ -40,7 +42,8 @@ index.html               빌드 결과물 (커밋한다. main에서는 이게 �
 python3 tools/build.py && node --check build/game.js && node tools/test_render.js
 ```
 밸런스에 영향 있는 변경이면 `node tools/test_balance.js`를 3번 병렬로 돌려 평균을 본다.
-템플릿의 `__BALANCE__ __SKIN__ __TROPHY__ __SLOGO__` 자리는 빌드가 채운다.
+템플릿의 `__BALANCE__ __SKIN__ __TROPHY__ __SLOGO__ __AVATAR__ __HELMETS__` 자리는 빌드가 채운다.
+아바타·헬멧 그림은 찬우가 이미지 AI로 뽑아 준 것(키 색: 초록=헬멧 메인색, 자홍=포인트색, 청록=바이저). 게임에서 `recolor`로 바꿔 칠한다.
 큰 base64 데이터는 grep/python으로 필요한 부분만 다룬다.
 
 ## 밸런스 목표 (현재 맞춰 둔 값)

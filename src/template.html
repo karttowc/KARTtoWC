@@ -5,6 +5,7 @@
 <title>카트부터 월챔까지</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<script data-goatcounter="https://lchanwoo05.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <style>
 /* Layout: one phone-width column, cards stacked, bottom tab bar — paddock timing-screen numerals on a Toss-style dark app */
 :root{
@@ -2373,7 +2374,7 @@ function hofAdd(){if(!S||!S.p||!S.p.retired)return;S.cid??=Date.now()+'-'+Math.r
     peak:p.peak,jr:p.jr.length,trs:[...altTrophies(p).map(t=>t.n),...p.jr.map(j=>`${j.name} 챔피언`)]});
   hofSave(rkSort(a));rkPush()}
 /* ---------- anonymous play log (Google Apps Script -> Sheet) ---------- */
-const LOG_URL='https://script.google.com/macros/s/AKfycbwQLNST9m47Rbh9GRou9a2Yrl0L0cYt8ImopVt-ZC0TKSZcxVAWrTCNkuFCChwJuKIE/exec',LOG_VER='0.25.0',KEYL='k2wc-log-v1';
+const LOG_URL='https://script.google.com/macros/s/AKfycbwQLNST9m47Rbh9GRou9a2Yrl0L0cYt8ImopVt-ZC0TKSZcxVAWrTCNkuFCChwJuKIE/exec',LOG_VER='0.25.1',KEYL='k2wc-log-v1';
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 const logOff=()=>lsGet('k2wc-log-off')==='1';

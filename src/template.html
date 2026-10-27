@@ -142,7 +142,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .hnum{position:absolute;left:31%;top:57%;transform:translate(-50%,-50%);font-family:"Barlow Condensed",sans-serif;font-weight:700;color:#fff;-webkit-text-stroke:.06em #000;paint-order:stroke;line-height:1;pointer-events:none}
 .helmet svg{display:block;width:86%;height:auto;shape-rendering:crispEdges;image-rendering:pixelated}
 .hed{display:flex;flex-direction:column;gap:14px}
-.htabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;background:var(--surface-2);border-radius:12px}
+.htabs{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;padding:4px;background:var(--surface-2);border-radius:12px}
 .htabs button{border:0;background:none;color:var(--muted);font-size:14px;font-weight:600;padding:8px 0;border-radius:9px}
 .htabs button[aria-selected="true"]{background:var(--surface);color:var(--fg)}
 .hed .swatches{flex-wrap:nowrap;overflow-x:auto;gap:8px;padding:4px 2px 6px;margin-top:6px;scrollbar-width:none}
@@ -1794,21 +1794,20 @@ function shade(hex,f){const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&2
 /* helmet sprites (data/helmets.json, one per pattern): green shell -> base, magenta pattern -> sec, cyan visor -> visor tint */
 const HVIS_COL={dark:'#2A2F3A',smoke:'#566074',gold:'#D9A520',blue:'#2F72D6'};
 const HIMG=[],HC={};
-function helmetCanvas(h){h=normHelmet(h);const pi=Math.max(0,HPAT.findIndex(x=>x[0]===h.pat)),k=pi+h.base+h.sec+h.vis;if(HC[k])return HC[k];
+function helmetCanvas(h){h=normHelmet(h);const pi=0,k=h.base+h.sec+h.vis;if(HC[k])return HC[k];
   const im=spriteImg(HIMG,HELMETS,pi);if(!im||!im.complete||!im.naturalWidth){spriteWait=true;return null}
   const B=hexHsl(h.base),Sx=hexHsl(h.sec),V=h.vis==='iri'?null:hexHsl(HVIS_COL[h.vis]||HVIS_COL.dark);
   return HC[k]=recolor(im,(hu,s,l,x,w)=>s>.2&&hu>.2&&hu<.45?[B,.45]:s>.2&&hu>.75&&hu<.95?[Sx,.45]:s>.2&&hu>=.45&&hu<.6?[V||[(x/w*1.6+.7)%1,.75,.5],.5]:null)}
-function helmetSrc(h){const c=helmetCanvas(h);if(c)return c.url;h=normHelmet(h);return HELMETS[Math.max(0,HPAT.findIndex(x=>x[0]===h.pat))]}
+function helmetSrc(h){const c=helmetCanvas(h);if(c)return c.url;return HELMETS[0]}
 function helmetImg(h){return`<img class="himg" src="${helmetSrc(h)}" alt="">`}
 function helmet(h,num,size=56){return`<div class="helmet" style="width:${size}px;height:${size}px">${helmetImg(h)}${num!=null?`<b class="hnum" style="font-size:${Math.round(size*.19)}px">${esc(num)}</b>`:''}</div>`}
 function drawHelmet(g,h,num,x0,y0,sc){const w=24*sc,c=helmetCanvas(h);if(!c)return;const ht=w*c.h/c.w;y0+=(w*.75-ht)/2+sc*2;
   g.imageSmoothingEnabled=false;g.drawImage(c.canvas,x0,y0,w,ht);g.imageSmoothingEnabled=true;
   g.font=`700 ${w*.19}px "Barlow Condensed",sans-serif`;g.textAlign='center';g.lineWidth=w*.025;g.strokeStyle='#000';g.strokeText(String(num),x0+w*.32,y0+ht*.66);g.fillStyle='#fff';g.fillText(String(num),x0+w*.32,y0+ht*.66)}
 let hedTab='col';
-function helmetEditor(h){h=normHelmet(h);const tabs=[['col','색'],['pat','패턴'],['vis','바이저']];
+function helmetEditor(h){h=normHelmet(h);const tabs=[['col','색'],['vis','바이저']];
   const sw=(k,v)=>`<div class="swatches">${HCOL.map(c=>`<button class="sw" type="button" data-${k}="${c}" aria-label="${c}" aria-pressed="${c===v}" style="background:${c}"></button>`).join('')}</div>`;
-  const body=hedTab==='col'?`<div class="lbl">메인 색${sw('hb',h.base)}</div><div class="lbl">포인트 색${sw('hs',h.sec)}</div>`
-    :hedTab==='pat'?`<div class="hgrid">${HPAT.map(([k,l])=>`<button class="hopt" type="button" data-hp="${k}" aria-pressed="${k===h.pat}">${helmetImg({...h,pat:k})}<span>${l}</span></button>`).join('')}</div>`
+  if(hedTab!=='vis')hedTab='col';const body=hedTab==='col'?`<div class="lbl">메인 색${sw('hb',h.base)}</div><div class="lbl">포인트 색 (줄무늬)${sw('hs',h.sec)}</div>`
     :`<div class="hgrid">${HVIS.map(([k,l])=>`<button class="hopt" type="button" data-hv="${k}" aria-pressed="${k===h.vis}">${helmetImg({...h,vis:k})}<span>${l}</span></button>`).join('')}</div>`;
   return`<div class="hed"><div class="htabs" role="tablist">${tabs.map(([k,l])=>`<button type="button" role="tab" data-htab="${k}" aria-selected="${k===hedTab}">${l}</button>`).join('')}</div>${body}</div>`}
 function randomHelmet(){return{base:pick(HCOL),sec:pick(HCOL),pat:pick(HPAT)[0],vis:pick(HVIS)[0]}}

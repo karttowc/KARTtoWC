@@ -29,7 +29,7 @@ data/skin_f1_2026.json   팀·선수·시리즈 데이터. 팀 로고가 base64�
 data/series_logos.json   리그 로고(base64) → 읽지 말 것
 data/trophies.json       트로피 그림(base64, 찬우가 준 이미지) → 읽지 말 것
 data/avatars.json        드라이버 아바타 12종(base64). 원본 data/avatars_src/, tools/avatars.py로 생성 → 읽지 말 것
-data/helmets.json        헬멧 패턴 8종(base64). 원본 data/helmets_src/, tools/helmets.py로 생성 → 읽지 말 것
+data/helmets.json        헬멧 1종(플레인 + 옆 핀스트라이프, base64). 원본 data/helmets_src/, tools/helmets.py로 생성 → 읽지 말 것
 tools/build.py           template + data → index.html, build/game.js
 tools/test_render.js     모든 화면 렌더 스모크 테스트 ("render ok" 나오면 통과)
 tools/test_balance.js    300커리어 시뮬 (약 100초). 마지막 줄: F1 debut / champ1+ / champ5+

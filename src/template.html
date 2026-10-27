@@ -1533,7 +1533,9 @@ const AV_NAT={KOR:11,JPN:7,CHN:5,THA:5,IND:2,SRI:2,BRA:2,ESP:2,ITA:2,MEX:2,ARG:2
 const avDefault=nat=>AV_NAT[nat]??0;
 /* avatar sprites: green suit -> helmet base, magenta stripes -> helmet sec (lightness kept). Cached per combo. */
 const AVIMG=[],AWIMG=[],AVC={};let spriteWait=false;
-function spriteImg(arr,src,i){if(typeof Image==='undefined')return null;if(!arr[i]){const im=new Image();im.onload=()=>{if(spriteWait){spriteWait=false;render()}};im.src=src[i];arr[i]=im}return arr[i]}
+function spriteImg(arr,src,i){if(typeof Image==='undefined')return null;if(!arr[i]){const im=new Image();im.onload=()=>{avFix();if(spriteWait){spriteWait=false;render()}};im.src=src[i];arr[i]=im}return arr[i]}
+/* overlays (champion, contract, ceremony) aren't redrawn by render(): repaint avatars still showing the raw green sprite */
+function avFix(){if(typeof document==='undefined')return;document.querySelectorAll('img[data-avp]').forEach(e=>{const d=e.dataset,c=avatarCanvas(+d.avp,{base:d.hb,sec:d.hs},!!d.aw);if(c){e.src=c.url;e.removeAttribute('data-avp')}})}
 /* recolour an image: rule(hue,sat,light,x,w) -> [[h,s,l], refLight] or null; lightness offset from refLight is kept */
 function recolor(im,rule){const c=document.createElement('canvas'),w=c.width=im.naturalWidth,ht=c.height=im.naturalHeight,g=c.getContext('2d');g.drawImage(im,0,0);
   const d=g.getImageData(0,0,w,ht),a=d.data;
@@ -1549,14 +1551,17 @@ function avatarCanvas(i,h,win){const L=win?AVWIN:AVATAR;i=Math.max(0,Math.min(L.
   const B=hexHsl(h.base),Sx=hexHsl(h.sec);
   return AVC[k]=recolor(im,(hu,s,l)=>s>.35&&hu>.22&&hu<.45?[B,.5]:s>.35&&hu>.78&&hu<.92?[Sx,.5]:null)}
 function avatarSrc(i,h,win){const c=avatarCanvas(i,h,win),L=win?AVWIN:AVATAR;return c?c.url:L[Math.max(0,Math.min(L.length-1,i|0))]}
-function avatar(i,h,size=56,full){return full?`<img class="avfull" src="${avatarSrc(i,h)}" alt="" style="height:${size}px">`:`<div class="avface" style="width:${size}px;height:${size}px"><img src="${avatarSrc(i,h)}" alt=""></div>`}
+/* src + (if the recoloured sprite isn't ready yet) markers so avFix can repaint it once loaded */
+function avAttr(i,h,win){const c=avatarCanvas(i,h,win);if(c)return`src="${c.url}"`;h=normHelmet(h);
+  return`src="${avatarSrc(i,h,win)}" data-avp="${i|0}" data-hb="${h.base}" data-hs="${h.sec}"${win?' data-aw="1"':''}`}
+function avatar(i,h,size=56,full){return full?`<img class="avfull" ${avAttr(i,h)} alt="" style="height:${size}px">`:`<div class="avface" style="width:${size}px;height:${size}px"><img ${avAttr(i,h)} alt=""></div>`}
 const pAv=p=>p.avatar??avDefault(p.nat);
 /* trophy art by key: F1 / alt series id (image) or junior series (pixel cup); th = height in px */
 function trophyArt(k,th){return TROPHY[k]?`<img src="${TROPHY[k]}" alt="" style="height:${th}px;width:auto;display:block">`:JR_LBL[k]?jrTrophy(k,th):px(TROPHY_MAP,TROPHY_PAL,th)}
 const trRatio=k=>TROPHY[k]?.55:.42;
 /* full-body trophy pose; size = figure height. Trophy sits behind the gloves so they look like they grip it */
 function avatarWin(i,h,size,k){const th=Math.round(size*trRatio(k)),top=th-Math.round(size*.08);
-  return`<div class="avwin" style="width:${Math.round(size*.62)}px;height:${size+top}px"><span class="awt">${trophyArt(k,th)}</span><img class="avfull" src="${avatarSrc(i,h,true)}" alt="" style="height:${size}px"></div>`}
+  return`<div class="avwin" style="width:${Math.round(size*.62)}px;height:${size+top}px"><span class="awt">${trophyArt(k,th)}</span><img class="avfull" ${avAttr(i,h,true)} alt="" style="height:${size}px"></div>`}
 function sLogo(sid,h=14){return SLOGO[sid]?`<img src="${SLOGO[sid]}" alt="" style="height:${h}px;width:auto;vertical-align:-2px;margin-right:6px">`:''}
 const TROPHY_IMG={};for(const k in TROPHY){const i=new Image();i.src=TROPHY[k];TROPHY_IMG[k]=i}
 const LOGO_IMG={};K.teams.forEach(k=>{if(k.logo){const i=new Image();i.src=k.logo;LOGO_IMG[k.id]=i}});
@@ -2907,7 +2912,7 @@ document.getElementById('importFile').addEventListener('change',e=>{
   rd.readAsText(f);e.target.value='';
 });
 
-S=load();if(S){const p=S.p;if(S.jr===undefined){if(S.year<=K.start_year+1&&!p.retired)initJrPool();else S.jr=[]}S.f1.forEach(d=>{if(d.name==='이삭 하자르')d.name='아이작 하자르'});if(S.rival&&!S.rival.nm2){const nn=genName(S.rival.nat);S.f1.forEach(d=>{if(d.id==='rival')d.name=nn});S.rival.name=nn;S.rival.nm2=1}
+S=load();if(S){const p=S.p;avatarCanvas(pAv(p),p.helmet,true);if(S.jr===undefined){if(S.year<=K.start_year+1&&!p.retired)initJrPool();else S.jr=[]}S.f1.forEach(d=>{if(d.name==='이삭 하자르')d.name='아이작 하자르'});if(S.rival&&!S.rival.nm2){const nn=genName(S.rival.nat);S.f1.forEach(d=>{if(d.id==='rival')d.name=nn});S.rival.name=nn;S.rival.nm2=1}
   S.f1.forEach(d=>{if(d.rookie&&!d.nm2){d.name=genName(d.nationality);d.nm2=1}});[...S.f1,...(S.jr||[]),...(S.rival?[S.rival]:[])].forEach(d=>{if(/니에미/.test(d.name))d.name=genName(d.nationality||d.nat)});if(!p.scout&&!p.retired)scoutInit(p);{const rd=S.f1.find(d=>d.id==='rival');if(rd)rd.id='ex'+Date.now()}S.rival=null;p.fans??=10;p.morale??=60;p.repBonus??=0;if(p.val==null){p.val=0;p.valPeak=0}p.challenges??=[];p.monaco??=false;S.events??=[];S.challenge??=null;S.news??=null;S.train??=null;S.react??=null;S.vacancies??=[];if(S.phase==='progress'&&!S.season)S.phase='result';if(S.news&&!S.news.heads)S.news=null;S.notice??=null;p.contract??=null;p.helmet=normHelmet(p.helmet)}render();
 (async()=>{try{if(window.claude&&window.claude.use){DL=await window.claude.use('downloads');if(DL)render()}}catch(_){}})();
 document.fonts&&document.fonts.ready.then(()=>{if(S&&S.p.retired)render()});

@@ -14,7 +14,7 @@
 ## 버전·브랜치
 
 - 공개 전이라 **v0.x**. 새 기능 = 부 버전(v0.19.0), 작은 수정 = 수 버전(v0.18.3). 공개하는 날 **v1.0.0**.
-- 마지막 버전: **v0.21.1** (욕 이름으로 다음 누르면 랭킹 제외 안내 토스트. v0.21.0: 명예의 전당 → 온라인 랭킹).
+- 마지막 버전: **v0.22.0** (게임 속 드라이버 등장: BREAKING 전신, 계약서·은퇴식 마지막 장 증명사진, 은퇴식 첫 장 전신+헬멧, 챔피언 화면·결산 카드는 트로피 포즈).
 - **dev 브랜치에서 작업**한다. `main`은 공개 사이트(GitHub Pages)다.
 - 찬우가 **"올려줘"** 라고 할 때만 dev를 main에 합친다. 그 전에는 main을 건드리지 않는다.
 - 보고할 때 "v0.18.3 올렸어"처럼 버전을 붙인다.
@@ -28,7 +28,8 @@ data/balance.json        밸런스 숫자 (성장, 레이스 가중치, F1 시�
 data/skin_f1_2026.json   팀·선수·시리즈 데이터. 팀 로고가 base64로 들어 있어 큼 → 통째로 Read 하지 말 것
 data/series_logos.json   리그 로고(base64) → 읽지 말 것
 data/trophies.json       트로피 그림(base64, 찬우가 준 이미지) → 읽지 말 것
-data/avatars.json        드라이버 아바타 12종(base64). 원본 data/avatars_src/, tools/avatars.py로 생성 → 읽지 말 것
+data/avatars.json        드라이버 아바타 12종(base64). 원본 data/avatars_src/sheet*.png, tools/avatars.py로 생성 → 읽지 말 것
+data/avatars_win.json    같은 12명 트로피 포즈(두 팔 위, 빈손). 원본 data/avatars_src/win*.png, 같은 툴로 생성 → 읽지 말 것
 data/helmets.json        헬멧 1종(플레인 + 옆 핀스트라이프, base64). 원본 data/helmets_src/, tools/helmets.py로 생성 → 읽지 말 것
 tools/build.py           template + data → index.html, build/game.js
 tools/test_render.js     모든 화면 렌더 스모크 테스트 ("render ok" 나오면 통과)
@@ -42,7 +43,7 @@ index.html               빌드 결과물 (커밋한다. main에서는 이게 �
 python3 tools/build.py && node --check build/game.js && node tools/test_render.js
 ```
 밸런스에 영향 있는 변경이면 `node tools/test_balance.js`를 3번 병렬로 돌려 평균을 본다.
-템플릿의 `__BALANCE__ __SKIN__ __TROPHY__ __SLOGO__ __AVATAR__ __HELMETS__` 자리는 빌드가 채운다.
+템플릿의 `__BALANCE__ __SKIN__ __TROPHY__ __SLOGO__ __AVATAR__ __AVWIN__ __HELMETS__` 자리는 빌드가 채운다.
 아바타·헬멧 그림은 찬우가 이미지 AI로 뽑아 준 것(키 색: 초록=헬멧 메인색, 자홍=포인트색, 청록=바이저). 게임에서 `recolor`로 바꿔 칠한다.
 큰 base64 데이터는 grep/python으로 필요한 부분만 다룬다.
 
@@ -83,6 +84,6 @@ python3 tools/build.py && node --check build/game.js && node tools/test_render.j
 
 - 프리시즌 선택지 리뉴얼(B, 대기): 얻는 것 = 능력치·인기·평판, 대가 = 체력·돈·컨디션. 인기와 평판은 맞바꾸지 않는다.
 - 닮은 드라이버 추가 제안 중: 무승 F1 중위권(마그누센, 알본, 쓰노다, 스트롤 등), 깜짝 1승(말도나도, 파니스).
-- 계약서·BREAKING·은퇴식에 아바타 넣기 + 포즈 그림(사인, 트로피 등): 찬우가 이미지 AI로 뽑을 예정. 추천: BREAKING엔 전신, 나머지는 증명사진.
+- 드라이버 등장(v0.22.0 완료): `avatar`(증명사진/전신), `avatarWin`(트로피 포즈 + 무대별 트로피를 손 뒤에 겹침, `bestTrophy`). 사인 포즈 등은 나중에.
 - 헬멧 패턴·색 추가는 나중에(이미지 AI 8패턴 시트는 찬우가 별로라 해서 뺌, data/helmets_src/sheet.png에 보관). 드라이버 이름 프리셋은 넣지 않음.
 - 출시 전 전체 점검(풀 커리어 자동 실행 + 화면별 스크린샷) → v1.0.0 → main.

@@ -3805,8 +3805,8 @@ function contractShow(o,done){
       <div class="cxhint">탭해서 건너뛰기</div></div>`;
     drawSig(el.querySelector('.sb.me svg'),700,1200);drawSig(el.querySelector('.sb.tm svg'),2000,500);
     if(!I.big&&!I.alt){later(finish,3900);el.onclick=finish;return}
-    later(()=>el.querySelector('.cxp').classList.add('out'),3300);
-    later(()=>{const bk=el.querySelector('.bk');
+    let opened=false;
+    const open=()=>{if(opened)return;opened=true;const bk=el.querySelector('.bk');
       bk.innerHTML=I.big?`<div class="cxa">
           <div class="mq">${['o l','f r','o l','f r','o l'].map((c,i)=>{const w=i%2?I.en:'BREAKING',s=Array(6).fill(w).join(' · ');return`<div class="${c}">${esc(s)} · ${esc(s)} · </div>`}).join('')}</div>
           <div class="brk"><b>BREAKING</b><div class="tk"><span>${I.news}</span></div></div>
@@ -3818,9 +3818,11 @@ function contractShow(o,done){
         :`<div class="cxc"><div class="num">${esc(p.num)}</div><div class="hel">${helmet(p.helmet,p.num,110)}</div>
           <div class="info"><div class="lg">${mark}</div><div class="nm">${esc(p.name)}</div><div class="ln">${esc(I.line)}</div><div class="sg">${sigSVG(p.sig,170,56,'#fff')}</div></div></div>`;
       el.querySelector('.cxg').classList.add('open');
-      drawSig(el.querySelector(I.big?'.cxa .sg svg':'.cxc .sg svg'),I.big?1900:1500,800)},3700);
-    if(I.big)later(()=>{const h=el.querySelector('.cxhint');if(h){h.textContent='탭해서 계속';h.classList.add('end')}},7000);else later(finish,7000);
-    el.onclick=finish};
+      drawSig(el.querySelector(I.big?'.cxa .sg svg':'.cxc .sg svg'),I.big?1900:1500,800);
+      if(I.big)later(()=>{const h=el.querySelector('.cxhint');if(h){h.textContent='탭해서 계속';h.classList.add('end')}},3300);else later(finish,3300)};
+    later(()=>el.querySelector('.cxp').classList.add('out'),3300);later(open,3700);
+    // tap while signing → jump straight to the shutter opening; tap after that → close
+    el.onclick=()=>{if(opened)return finish();TM.forEach(clearTimeout);TM.length=0;el.querySelector('.cxp').classList.add('out');open()}};
   if(p.sig&&p.sig.length)run();
   else{el.innerHTML='<div class="cxst"><div class="cxg"><div class="room"></div><div class="floor"></div><div class="shut"></div></div></div>';
     const pad=document.createElement('div');el.querySelector('.cxst').appendChild(pad);sigPad(pad,st=>{p.sig=st;save();run()})}

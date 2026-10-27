@@ -5,3 +5,4 @@ __pycache__/
 !data/avatars_src/*.png
 !data/helmets_src/*.png
 play_logs.json
+play_logs_state.json

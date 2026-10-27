@@ -908,7 +908,7 @@ function finishSeason(){
   S.news=buildNews(tierLines,prevM);
   buildNotice();
   S.react=buildReact(rec,{inc:Z.incidents||[],gacha:Z.gacha||null,monacoWin:p.series==='F1'&&me.fp[7]===1,wetN,wetPod,injured:ev.some(x=>x.includes('결장')),dnfAvg:(()=>{const f=me.fp.filter(x=>x&&x<99);return f.length?Math.round(f.reduce((a,b)=>a+b,0)/f.length):null})()});
-  logSeason(rec);S.logPre=null;
+  logSeason(rec);S.logPre=null;S.logPick=null;
   S.season=null;S.evSeason=[];S.phase='result';sel=null;save();
 }
 
@@ -1241,8 +1241,8 @@ function makeOffers(pos,field,h2h){
 }
 
 function applyOffer(o){
-  const p=S.p,ev=[];logEv('pick',{year:S.year,age:p.age,from:p.series==='ALT'?p.alt:p.series,pick:o.kind+':'+(o.teamId||o.series||o.altId||'')+':'+(o.tier||(o.team&&o.team.tier)||(o.teamId?teamDef(o.teamId).tier:'')),
-    offers:(S.offers||[]).map(x=>x.kind+':'+(x.teamId||x.series||x.altId||'')),ovr:ovrOf(p.stats)});
+  const p=S.p,ev=[];S.logPick={year:S.year,age:p.age,from:p.series==='ALT'?p.alt:p.series,pick:o.kind+':'+(o.teamId||o.series||o.altId||'')+':'+(o.tier||(o.team&&o.team.tier)||(o.teamId?teamDef(o.teamId).tier:'')),
+    offers:(S.offers||[]).map(x=>x.kind+':'+(x.teamId||x.series||x.altId||'')),ovr:ovrOf(p.stats)};
   const leavingF1Seat=p.series==='F1'&&p.role==='race'&&!(o.kind==='resign');
   const oldTeam=p.series==='F1'?p.team.id:null;
   if(o.kind==='retire'){p.retired=true;logRetire();if(leavingF1Seat)fillSeat(oldTeam);S.phase='retired';save();return}
@@ -2392,23 +2392,26 @@ function hofAdd(){if(!S||!S.p||!S.p.retired)return;S.cid??=Date.now()+'-'+Math.r
     peak:p.peak,jr:p.jr.length,trs:[...altTrophies(p).map(t=>t.n),...p.jr.map(j=>`${j.name} 챔피언`)]});
   hofSave(rkSort(a));rkPush()}
 /* ---------- anonymous play log (Google Apps Script -> Sheet) ---------- */
-const LOG_URL='https://script.google.com/macros/s/AKfycbwQLNST9m47Rbh9GRou9a2Yrl0L0cYt8ImopVt-ZC0TKSZcxVAWrTCNkuFCChwJuKIE/exec',LOG_VER='0.26.0',KEYL='k2wc-log-v1';
+const LOG_URL='https://script.google.com/macros/s/AKfycbwQLNST9m47Rbh9GRou9a2Yrl0L0cYt8ImopVt-ZC0TKSZcxVAWrTCNkuFCChwJuKIE/exec',LOG_V2=false,LOG_VER='0.26.2',KEYL='k2wc-log-v1';
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 const logOff=()=>lsGet('k2wc-log-off')==='1';
 function logUid(){let u=lsGet('k2wc-uid');if(!u){u=Math.random().toString(36).slice(2,10)+Date.now().toString(36);lsSet('k2wc-uid',u)}return u}
 function logQ(){try{return JSON.parse(lsGet(KEYL)||'[]')}catch(e){return[]}}
-// queued so a record made offline goes up on the next launch
-function logEv(kind,d){if(logOff()||!S)return;const q=logQ();q.push({uid:logUid(),cid:S.cid||'',kind,v:LOG_VER,t:Date.now(),...d});lsSet(KEYL,JSON.stringify(q.slice(-200)));logFlush()}
+// queued so a record made offline goes up on the next launch; v2 sheet takes batches, so wait for 5 (or retire / leaving the page)
+function logEv(kind,d){if(logOff()||!S)return;const q=logQ();q.push({uid:logUid(),cid:S.cid||'',kind,v:LOG_VER,t:Date.now(),...d});lsSet(KEYL,JSON.stringify(q.slice(-200)));
+  if(!LOG_V2||kind==='retire'||q.length>=5)logFlush()}
 let logBusy=false;
 function logFlush(){if(logBusy||!rkNet()||logOff())return;const q=logQ();if(!q.length)return;logBusy=true;
-  const d=q[0];fetch(LOG_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(d)})
-    .then(()=>{lsSet(KEYL,JSON.stringify(logQ().filter(x=>!(x.t===d.t&&x.kind===d.kind))));logBusy=false;logFlush()}).catch(()=>{logBusy=false})}
+  const b=LOG_V2?q.slice(0,30):[q[0]],sent=new Set(b.map(x=>x.t+x.kind));
+  fetch(LOG_URL,{method:'POST',mode:'no-cors',keepalive:true,headers:{'Content-Type':'text/plain'},body:JSON.stringify(LOG_V2?b:b[0])})
+    .then(()=>{lsSet(KEYL,JSON.stringify(logQ().filter(x=>!sent.has(x.t+x.kind))));logBusy=false;logFlush()}).catch(()=>{logBusy=false})}
+if(typeof document!=='undefined'&&document.addEventListener)document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')logFlush()});
 function logSeason(rec){const p=S.p,c=currentLine(),Z=S.season||{},L=S.logPre||{};
   logEv('season',{year:rec.year,age:rec.age,lk:rec.lk,role:rec.role,tier:c.tier,team:rec.team,pos:rec.pos,field:rec.field,starts:rec.starts,wins:rec.wins,podiums:rec.podiums,poles:rec.poles,dnf:rec.dnf,
     titled:!!rec.titled,ovr0:rec.ovrBefore,ovr1:rec.ovrAfter,pot:p.potential,s0:(Z.ctx&&Z.ctx.statsBefore)||null,stats:p.stats,focus:p.focus,train:S.train||null,morale0:L.morale??null,morale1:p.morale,fans:p.fans,rep:p.rep,
     ev:(S.evSeason||[]).map(e=>e.id+':'+e.j),ch:L.ch||null,ga:Z.gacha?Z.gacha.id+':'+(Z.gacha.res||'-'):null,inc:(Z.incidents||[]).filter(x=>x.done).length,slump:rec.slump||null,
-    h2h:rec.h2h?[rec.h2h.q,rec.h2h.r]:null,slp:slPoints(),sc:Math.max(0,...Object.values(p.scout||{0:0})),acad:p.academy||null,why:rec.why||null})}
+    h2h:rec.h2h?[rec.h2h.q,rec.h2h.r]:null,slp:slPoints(),sc:Math.max(0,...Object.values(p.scout||{0:0})),acad:p.academy||null,why:rec.why||null,pick:S.logPick||null})}
 function logRetire(){const p=S.p,t=p.tot;
   logEv('retire',{year:S.year,age:p.age,seasons:p.history.length,debut:p.debutYear||null,f1s:p.history.filter(h=>h.sid==='F1'&&h.role==='race').length,titles:t.titles,wins:t.wins,podiums:t.podiums,starts:t.starts,
     peak:p.peak,pot:p.potential,style:p.style,fans:p.fans,earn:p.earn||0,path:p.history.map(h=>h.lk+(h.role==='reserve'?'r':'')).join('>'),ch:(p.challenges||[]).map(c=>c.id+':'+c.res)})}

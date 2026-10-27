@@ -473,6 +473,11 @@ html,body{margin:0}
 .sumtop b{font-family:'Barlow Condensed',sans-serif;font-size:34px;line-height:1}.sumtop b i{font-style:normal;color:var(--dim);font-size:22px}.sumtop b em{font-style:normal;color:var(--accent)}
 .sumtop b.sm{font-size:22px}.sumtop .delta{font-size:13px}
 .hlchips{display:flex;flex-wrap:wrap;gap:6px}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sgh{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--dim)}.sgh em{font-style:normal;color:var(--accent)}
+.sg{background:#0A0B0D;border:1px solid #23262D;border-radius:10px;padding:7px 8px;display:grid;grid-template-columns:1fr auto;align-items:baseline;row-gap:1px}
+.sg.f{border-color:var(--accent)}.sg span{grid-column:1/-1;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sg.f span{color:var(--accent)}
+.sg b{font-size:22px;line-height:1;color:#fff}.sg i{font-style:normal;font-weight:700;font-size:14px;color:var(--dim)}.sg i.up{color:var(--good)}.sg i.down{color:var(--bad)}
 .hc{font-size:12px;font-weight:700;padding:5px 9px;border-radius:9px;background:var(--surface-2);color:#C9CEDA}
 .hc.p1{background:#3A3018;color:var(--gold)}.hc.p2{background:#2B2F38;color:#E3E7EE}.hc.p3{background:#3A2A1E;color:#E0A06A}
 button.hc{all:unset;box-sizing:border-box;font-size:12px;font-weight:700;padding:5px 9px;border-radius:9px;background:var(--surface-2);color:var(--dim);cursor:pointer}
@@ -998,7 +1003,6 @@ function newcomer(teamId){const c=(S.jr||[]).filter(d=>d.st==='on'&&d.series==='
 function fillVacancies(){for(const t of S.teams)for(let i=seatsTaken(t.id);i<2;i++){const r=newcomer(t.id);S.f1.push(r);if(r.prodigy)S.p.rivalNote=`${r.name}, ${t.name}에서 데뷔하는 천재 신인`};S.vacancies=[]}
 // the defending F1 champion gets hunted: the strongest AI drivers move into the fastest cars
 function champHunt(){const H=B.career.champ_hunt,p=S.p;if(!H)return;
-  const ro=w=>{const c=w.charCodeAt(w.length-1)-0xAC00;return c>=0&&c<11172&&c%28&&c%28!==8?'으로':'로'};
   const fast=[...S.teams].sort((a,b)=>b.machine-a.machine).slice(0,H.cars).map(t=>t.id);
   const stars=[...S.f1].sort((a,b)=>ovrOf(b.stats)-ovrOf(a.stats));
   for(const tid of fast){for(const d of S.f1.filter(x=>x.team===tid)){
@@ -1265,7 +1269,10 @@ function applyOffer(o){
   fillVacancies();
   if(S.last&&S.last.rec&&S.last.rec.titled&&S.last.rec.sid==='F1'&&p.series==='F1'&&p.role==='race')champHunt();
   {const tgt=p.age>=36?70:p.age>=33?78:85;p.morale=Math.round(p.morale+(tgt-p.morale)*.45)}
-  if(S.train==='rest')p.morale=Math.min(100,p.morale+15);
+  if(S.train==='rest'){p.morale=Math.min(100,p.morale+15);S.train='focus'}
+  // the plan carries over; a maxed stat is swapped for the recommended one
+  {const keep=p.focus.filter(k=>p.stats[k]<99),out=p.focus.filter(k=>p.stats[k]>=99);S.trAuto=null;
+    if(out.length||!p.focus.length){const add=recStats(B.driver.max_focus_stats-keep.length,keep).map(r=>r.k);p.focus=[...keep,...add];if(out.length&&add.length)S.trAuto={year:S.year,from:out,to:add}}}
   p.val=valueOf();p.valPeak=Math.max(p.valPeak||0,p.val);
   S.offers=[];S.phase='ready';S.events=genEvents();buildNotice();
   S.challenge=(p.series==='F1'&&p.role==='race'&&Math.random()<.2+p.fans/250)?(Math.random()<.7||p.age<24?{id:'LEMANS',name:'르망 24시'}:{id:'INDY500',name:'인디 500'}):null;
@@ -1614,6 +1621,7 @@ function tone(s,o={}){
 
 /* ---------- reactions: expert + fans ---------- */
 function ieyo(w){const c=w.charCodeAt(w.length-1)-0xAC00;return c>=0&&c<11172&&c%28?'이에요':'예요'}
+function ro(w){const c=w.charCodeAt(w.length-1)-0xAC00;return c>=0&&c<11172&&c%28&&c%28!==8?'으로':'로'}
 function josa(w){const c=w.charCodeAt(w.length-1)-0xAC00;return c>=0&&c<11172&&c%28?'을':'를'}
 const NICKS=['새벽알람','피트레인직관러','타이어요정','DRS열어','언더컷장인','입문3년차','헬멧수집가','패독고양이','세이프티카','블루플래그','체커기','예선덕후','풀웻파','부산f1팬','대전레이싱'];
 const PLAT=['커뮤니티','SNS','영상 댓글','팬카페'];
@@ -1874,12 +1882,12 @@ function readyCard(){
   if(p.series==='F1'&&p.role==='race'){const t=teamDef(p.team.id),mate=S.f1.find(d=>d.team===t.id);desc=`${K.series.find(s=>s.id==='F1').races}R${mate?' · 팀메이트 '+esc(mate.name):''}`}
   else if(p.series==='F1')desc='리저브 · 주전이 빠지면 대타 출전';
   else{const sd=p.series==='ALT'?altDef(p.alt):seriesDef(p.series);desc=`${sd.races}R · ${TIER_LBL[c.tier]}`}
-  const n=S.events.length,mxF=S.train!=='rest'&&p.focus.find(k=>p.stats[k]>=99);
+  const n=S.events.length,mxF=S.train!=='rest'&&p.focus.find(k=>p.stats[k]>=99),TA=S.trAuto&&S.trAuto.year===S.year?S.trAuto:null;
   const row=(attr,ic,title,sub,hot)=>`<button class="trow${hot?' need':''}" type="button" ${attr}><span class="ti">${ic}</span><span class="tb"><b>${title}</b><span>${sub}</span></span><span class="ta">›</span></button>`;
   return`<section class="card prep"><div><h2 class="h3" style="font-size:20px;margin:0">${S.year} 시즌 준비</h2><span class="muted" style="font-size:13px">${desc}</span></div>
     ${rivalLine()}
     <div class="tlist">
-      ${row('data-sheet="train"','훈련','훈련 계획',S.train==='rest'?'이번 시즌 휴식 · 체력 회복':mxF?`${LBL[mxF]} 최대치! 다른 능력치를 골라 보세요`:`${trName()} · 추천: ${recStats().map(r=>LBL[r.k]).join(', ')}`,!!mxF||(S.train!=='rest'&&!p.focus.length))}
+      ${row('data-sheet="train"','훈련','훈련 계획',S.train==='rest'?'이번 시즌 휴식 · 체력 회복':mxF?`${LBL[mxF]} 최대치! 다른 능력치를 골라 보세요`:TA?`${TA.to.map(k=>LBL[k]).join(', ')} · 최대치라 자동 교체`:`${trName()} · 추천: ${recStats().map(r=>LBL[r.k]).join(', ')}`,!!mxF||(S.train!=='rest'&&!p.focus.length))}
       ${n?row('data-sheet="ev0"','결정',`결정할 일 ${n}개`,esc(evDef(S.events[0].id).title)+(n>1?' 외':''),1):''}
       ${S.challenge?row('data-sheet="ch"','★',`${S.challenge.name} 출전 제안`,'선택 · 도전 이벤트',0):''}
       ${p.series==='F1'&&p.role==='race'?(p.xfer===S.year?`<div class="trow"><span class="ti" style="background:#3A1E22;color:#FF8A94">이적</span><span class="tb"><b>이적 요청 중</b><span>시즌 뒤 다른 팀들이 평가해요</span></span></div>`:row('data-sheet="xfer"','이적','이적 요청하기','선택 · 다른 팀으로 가고 싶다고 선언',0)):''}
@@ -1901,24 +1909,20 @@ const ALERT_EV=/방출|아카데미 경고|경고를 보냈어요|조기 해지|
 const OTHER_EV=/권으로|대규정|관심 팀 변화|컨스트럭터/;
 function resultCard(){
   const L=S.last,R=L.rec,d=R.ovrAfter-R.ovrBefore,mine=L.ev.filter(e=>!OTHER_EV.test(e)&&!ALERT_EV.test(e)),rest=L.ev.filter(e=>OTHER_EV.test(e));
-  const ups=[...L.deltas].sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,3);
+  const dm=Object.fromEntries(L.deltas.map(x=>[x.k,x.d])),fo=R.train&&R.train!=='휴식'?S.p.focus:[];
   const H=R.hl||[],ex=S.react&&S.react.year===R.year?S.react.expert[0]:null;
   return`<section class="card sum">
     <div class="sumtop"><div><span class="lbl">시즌 후 능력치 · 다음 시즌부터 반영</span><b class="num">${R.ovrBefore} <i>→</i> <em>${R.ovrAfter}</em></b>${d?`<span class="delta ${d<0?'down':''}">${d>0?'+':''}${d}</span>`:''}</div>
       ${R.val!=null?`<div style="text-align:right"><span class="lbl">몸값</span><b class="num sm">${won(R.val)}</b>${R.val!==R.valBefore?`<span class="delta ${R.val<R.valBefore?'down':''}">${R.val>R.valBefore?'+':'-'}${won(Math.abs(R.val-R.valBefore))}</span>`:''}</div>`:''}</div>
     ${R.earn?`<div class="earn">${R.earn.sal||R.earn.prize?`<span>올해 수익</span><b class="num">${won(R.earn.sal+R.earn.prize)}</b>${R.earn.prize?`<em>상금 ${won(R.earn.prize)} 포함</em>`:''}`:`<span>올해 수익</span><b>스폰서 지원으로 레이스 중</b>`}<i>통산 ${won(S.p.earn||0)}</i></div>`:''}
     ${R.h2h?`<div class="earn"><span>vs ${esc(R.h2h.mate)}</span><b class="num" style="font-size:14px">예선 ${R.h2h.q[0]}:${R.h2h.q[1]} · 결선 ${R.h2h.r[0]}:${R.h2h.r[1]}</b>${R.h2h.tp&&R.h2h.tp[1]>0?`<i>팀 포인트 기여 <b class="num" style="font-size:14px">${Math.round(R.h2h.tp[0]/R.h2h.tp[1]*100)}%</b> (${R.h2h.tp[0]}/${R.h2h.tp[1]})</i>`:''}</div>`:''}
-    ${ups.length?`<div class="chips">${ups.map(x=>`<span class="chip ${x.d>0?'up':'down'}">${LBL[x.k]} ${x.d>0?'+':''}${x.d}</span>`).join('')}</div>`:''}
-    ${H.length?`<div class="hlchips">${H.slice(0,hlMore?H.length:6).map(x=>`<span class="hc ${x.fp===1?'p1':x.fp===2?'p2':x.fp===3?'p3':''}">${esc(x.n.replace(/ · .*/,''))} ${x.fp===1?'우승':x.fp&&x.fp<=3?'P'+x.fp:''}${x.pole?' · 폴':''}</span>`).join('')}${H.length>6&&!hlMore?`<button class="hc more" type="button" data-hlmore="1">+${H.length-6}</button>`:''}</div>`:''}
+    <div class="sgrid"><div class="sgh"><span>능력치 변화</span>${R.train?`<em>훈련: ${esc(R.train)}</em>`:''}</div>${STATS.map(k=>{const v=dm[k]||0;return`<div class="sg${fo.includes(k)?' f':''}"><span>${LBL[k]}</span><b class="num">${S.p.stats[k]}</b><i class="${v>0?'up':v<0?'down':''}">${v>0?'+'+v:v<0?v:'–'}</i></div>`}).join('')}</div>
     ${mine.length?`<div class="mynews">${mine.slice(0,3).map(e=>`<div class="${tone(e)}">${withLogos(esc(e))}</div>`).join('')}</div>`:''}
     ${ex?`<div class="quote"><span>패독 분석가 J</span>${withLogos(esc(ex))}</div>`:''}
     <button class="more2" type="button" data-resmore="1">${resMore?'접기 ▴':'자세히 보기 ▾'}</button>
     ${resMore?`<div class="kv">
-      <div class="row"><span>출전 · 포인트</span><span class="num">${R.starts}경기${R.dnf?` · DNF ${R.dnf}`:''} · ${R.points}점</span></div>
-      ${R.h2h?`<div class="row"><span>vs ${esc(R.h2h.mate)}</span><span class="num">예선 ${R.h2h.q[0]}:${R.h2h.q[1]} · 레이스 ${R.h2h.r[0]}:${R.h2h.r[1]}</span></div>`:''}
-      ${R.h2h&&R.h2h.tp&&R.h2h.tp[1]>0?`<div class="row"><span>팀 포인트 기여</span><span class="num">${Math.round(R.h2h.tp[0]/R.h2h.tp[1]*100)}% (${R.h2h.tp[0]}/${R.h2h.tp[1]})</span></div>`:''}
-      ${R.train?`<div class="row"><span>훈련</span><span>${esc(R.train)}</span></div>`:''}
-      ${L.deltas.map(x=>`<div class="row"><span>${LBL[x.k]}</span><span class="num">${x.v} <span class="delta ${x.d<0?'down':''}">${x.d>0?'+':''}${x.d}</span></span></div>`).join('')}</div>
+      <div class="row"><span>출전 · 포인트</span><span class="num">${R.starts}경기${R.dnf?` · DNF ${R.dnf}`:''} · ${R.points}점</span></div></div>
+      ${H.length?`<div class="hlchips">${H.map(x=>`<span class="hc ${x.fp===1?'p1':x.fp===2?'p2':x.fp===3?'p3':''}">${esc(x.n.replace(/ · .*/,''))} ${x.fp===1?'우승':x.fp&&x.fp<=3?'P'+x.fp:''}${x.pole?' · 폴':''}</span>`).join('')}</div>`:''}
       ${[...mine.slice(3),...rest].length?`<div class="newslist">${[...mine.slice(3),...rest].map(e=>`<div class="${tone(e)}">${withLogos(esc(e))}</div>`).join('')}</div>`:''}`:''}
     <button class="btn" type="button" data-go="react">반응 보기</button></section>`;
 }
@@ -2624,9 +2628,9 @@ function peekHide(){const d=document.getElementById('peek');if(d)d.remove()}
 if(typeof document.addEventListener==='function'){document.addEventListener('pointerdown',e=>{if(e.target.closest('.peekbtn')){e.preventDefault();peekShow()}});
 ['pointerup','pointercancel','blur'].forEach(ev=>window.addEventListener(ev,peekHide));
 document.addEventListener('contextmenu',e=>{if(e.target.closest('.peekbtn'))e.preventDefault()});}
-// the training plan shows up every preseason so it never gets forgotten
+// the training plan carries over, so it only asks when nothing is picked
 function nextStep(){const p=S.p;
-  if(!chainSeen.tr){chainSeen.tr=1;sheet='train';render();return}
+  if(!chainSeen.tr&&S.train!=='rest'&&!p.focus.length){chainSeen.tr=1;sheet='train';render();return}
   if(S.events.length){sheet='ev0';render();return}
   if(S.challenge&&!chainSeen.ch){chainSeen.ch=1;sheet='ch';render();return}
   sheet='go';render()}
@@ -2744,14 +2748,14 @@ function fanSheet(){const p=S.p,v=(1+p.fans/250);
     <button class="btn" type="button" id="closeSheet">닫기</button></section></div>`}
 
 // which stat moves results the most: race-formula weight x room to grow, plus last season's problems
-function recStats(){const p=S.p,st=p.stats,dry=B.race.skill.dry,wet=B.race.skill.wet,q=B.race.skill.quali,L=p.history.at(-1)||{};
+function recStats(n=1,ex=[]){const p=S.p,st=p.stats,dry=B.race.skill.dry,wet=B.race.skill.wet,q=B.race.skill.quali,L=p.history.at(-1)||{};
   const dnf=(L.dnf||0)>=2,qBad=L.h2h&&L.h2h.q[0]<L.h2h.q[1];
   const sc=STATS.map(k=>{let w=.85*(dry[k]||0)+.15*(wet[k]||0)+.15*(q[k]||0);
     if(dnf&&(k==='consistency'||k==='mental'))w+=.12;if(qBad&&k==='quali')w+=.1;
-    return{k,v:w*Math.max(0,97-st[k])}}).sort((a,b)=>b.v-a.v);
+    return{k,v:w*Math.max(0,97-st[k])}}).filter(x=>!ex.includes(x.k)&&st[x.k]<99).sort((a,b)=>b.v-a.v);
   const why=k=>k==='race'?'결선에서 가장 중요한데 아직 낮아요':k==='tyre'?'레이스 후반 페이스를 지켜 줘요':k==='quali'?(qBad?'예선에서 팀메이트에게 밀렸어요':'출발 위치가 좋아져요'):
     k==='wet'?'비 오는 경기에서 크게 유리해요':k==='consistency'?(dnf?'리타이어가 잦았어요. 실수를 줄여 줘요':'매 랩 실수를 줄여 줘요'):(dnf?'리타이어가 잦았어요. 사고를 줄여 줘요':'압박 속에서도 흔들리지 않아요');
-  return sc.slice(0,1).map(x=>({k:x.k,why:why(x.k)}))}
+  return sc.slice(0,n).map(x=>({k:x.k,why:why(x.k)}))}
 function statSheet(k){const I=STAT_INFO[k];
   return`<div class="sheet" id="sheetBg"><section class="card"><div class="eyebrow">능력치 설명</div><h3 class="h2">${LBL[k]} <span class="num" style="color:var(--accent)">${S.p.stats[k]}</span></h3>
     <p style="margin:0">${I.d}</p><div class="kv"><h3 class="h3">게임에서 쓰이는 곳</h3>${I.u.map(x=>`<div class="row"><span>${x}</span></div>`).join('')}</div>
@@ -2804,7 +2808,7 @@ function sheetView(){
       <button class="btn" type="button" id="evNext" data-i="${i}" ${evPick==null?'disabled':''}>${chain?'다음':'결정하기'}</button>
       ${chain?'':'<button class="btn ghost" type="button" id="closeSheet">닫기</button>'}</section></div>`}
   if(sheet==='train'){const p=S.p,can=S.phase==='ready',rest=S.train==='rest',RS=recStats(),C='font-size:11px;padding:2px 7px';
-    return`<div class="sheet" id="sheetBg"><section class="card" style="max-height:85vh;overflow:auto"><div class="eyebrow">${esc(p.name)} · 프리시즌</div><h3 class="h2">훈련 계획</h3><p class="muted" style="margin:0">${can?`키울 능력치를 ${B.driver.max_focus_stats}개까지 골라요. 고른 능력치가 훨씬 빨리 자라요. 매 시즌 바꿀 수 있어요.`:'시즌 준비 단계에서 바꿀 수 있어요.'}</p>
+    return`<div class="sheet" id="sheetBg"><section class="card" style="max-height:85vh;overflow:auto"><div class="eyebrow">${esc(p.name)} · 프리시즌</div><h3 class="h2">훈련 계획</h3><p class="muted" style="margin:0">${can?`키울 능력치를 ${B.driver.max_focus_stats}개까지 골라요. 고른 능력치가 훨씬 빨리 자라요. 다음 시즌에도 그대로 이어져요.`:'시즌 준비 단계에서 바꿀 수 있어요.'}</p>
       <div class="list">${STATS.map(k=>{const r=RS.find(x=>x.k===k),mx=p.stats[k]>=99,on=!rest&&p.focus.includes(k);return`<button class="item" type="button" data-focus2="${k}" aria-pressed="${on}" ${can&&(!mx||on)?'':'disabled'}><span class="body"><b>${LBL[k]}${mx?` <span class="chip red" style="${C}">최대</span>`:r?` <span class="chip blue" style="${C}">추천</span>`:''}</b>${mx?'<span>더 오르지 않아요. 다른 능력치를 골라 보세요</span>':r?`<span>${r.why}</span>`:''}<span class="bar"><i style="width:${p.stats[k]}%"></i></span></span><span class="num" style="font-size:20px;color:var(--muted)">${p.stats[k]}</span><span class="tick"></span></button>`}).join('')}
         <button class="item" type="button" data-rest="1" aria-pressed="${rest}" ${can?'':'disabled'}><span class="body"><b>이번 시즌은 휴식</b><span>성장이 조금 느려지고, 다음 프리시즌에 체력 +15 (지금 ${p.morale})</span></span><span class="tick"></span></button></div>
       ${chain?`<button class="btn" type="button" id="trNext" ${rest||p.focus.length?'':'disabled'}>다음</button>`:'<button class="btn" type="button" id="closeSheet">완료</button>'}</section></div>`}

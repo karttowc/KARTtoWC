@@ -3918,9 +3918,9 @@ function peekHide(){const d=document.getElementById('peek');if(d)d.remove()}
 if(typeof document.addEventListener==='function'){document.addEventListener('pointerdown',e=>{if(e.target.closest('.peekbtn')){e.preventDefault();peekShow()}});
 ['pointerup','pointercancel','blur'].forEach(ev=>window.addEventListener(ev,peekHide));
 document.addEventListener('contextmenu',e=>{if(e.target.closest('.peekbtn'))e.preventDefault()});}
-// the training plan carries over, so it only asks when nothing is picked
+// the training plan shows up every preseason, pre-filled with last season's pick
 function nextStep(){const p=S.p;
-  if(!chainSeen.tr&&S.train!=='rest'&&!p.focus.length){chainSeen.tr=1;sheet='train';render();return}
+  if(!chainSeen.tr){chainSeen.tr=1;sheet='train';render();return}
   if(S.events.length){sheet='ev0';render();return}
   if(S.challenge&&!chainSeen.ch){chainSeen.ch=1;sheet='ch';render();return}
   sheet='go';render()}

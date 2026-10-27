@@ -927,7 +927,8 @@ function grow(p,played,poor){
   const rest=S.train==='rest';
   const AD=B.driver.age_decline_by_stat||{};
   const GS=B.driver.growth_spread||[.6,1.4];
-  STATS.forEach(k=>{let g=base*rnd(GS[0],GS[1]);if(g<0)g*=AD[k]??1;
+  const FS=B.driver.focus_spread||GS;// focused stats swing less so the focus always shows
+  STATS.forEach(k=>{const sp=base>0&&!rest&&p.focus.includes(k)?FS:GS;let g=base*rnd(sp[0],sp[1]);if(g<0)g*=AD[k]??1;
     if(g>0){g*=mult;if(rest)g*=B.driver.rest_multiplier;else if(p.focus.includes(k))g*=B.driver.focus_multiplier;
       if(ovr>=p.potential)g=0;else if(ovr>=p.potential-B.driver.near_potential.distance)g*=B.driver.near_potential.multiplier}
     p.stats[k]=clamp(p.stats[k]+sround(g),1,99)});

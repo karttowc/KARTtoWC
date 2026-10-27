@@ -125,6 +125,10 @@
   "growth_spread": [
    0.3,
    1.7
+  ],
+  "focus_spread": [
+   0.7,
+   1.3
   ]
  },
  "styles": [

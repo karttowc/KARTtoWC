@@ -2591,7 +2591,7 @@ const INC=[
    {label:'그대로 달린다',stat:'consistency',good:[0,1],bad:[2,4],dnf:.25}]},
  {id:'order',f1:true,title:'팀 무전: 팀메이트에게 자리를 내줘라',desc:'팀메이트의 챔피언십을 위해 필요하대요.',choices:[
    {label:'팀 오더를 따른다',fixed:{delta:1,eff:{rep:4,morale:-3}}},
-   {label:'무시하고 달린다',fixed:{delta:0,eff:{rep:-5,fans:4}}}]},
+   {label:'무시하고 달린다',fixed:{delta:0,eff:{fans:3,morale:-4}}}]},
  {id:'start',title:'스타트 직전, 앞이 막혀 있어요',desc:'첫 코너 인사이드에 틈이 보여요.',choices:[
    {label:'과감하게 인사이드로',stat:'race',good:[-3,-1],bad:[1,3],dnf:.08},
    {label:'안전하게 자리를 지킨다',stat:'consistency',good:[-1,0],bad:[0,1]}]},
@@ -2602,7 +2602,7 @@ const INC=[
    {label:'소프트로 재출발',stat:'race',good:[-3,-1],bad:[0,3]},
    {label:'하드로 끝까지',stat:'tyre',good:[-2,0],bad:[0,2]}]},
  {id:'matefight',f1:true,title:'마지막 랩, 팀메이트가 바로 앞',desc:'같은 팀 차가 바로 앞에 있어요. 팀은 "순위 유지"라고 무전했어요.',choices:[
-   {label:'그래도 공격한다',stat:'race',good:[-1,-1],bad:[1,3],dnf:.2,eff:{rep:-4,fans:3}},
+   {label:'그래도 공격한다',stat:'race',good:[-1,-1],bad:[1,3],dnf:.2,eff:{fans:3,morale:-3}},
    {label:'순위를 유지한다',fixed:{delta:0,eff:{rep:3}}}]},
  {id:'fuel',title:'연료가 아슬아슬해요',desc:'엔지니어가 연료를 아끼라고 지시했어요.',choices:[
    {label:'리프트 앤 코스트로 아낀다',fixed:{delta:1,eff:{rep:1}}},
@@ -2615,7 +2615,7 @@ const INC=[
    {label:'끝까지 밀어붙인다',stat:'consistency',good:[-2,-1],bad:[0,2],eff:{morale:-8}}]},
  {id:'pitfail',title:'피트 스톱 실수!',desc:'바퀴 하나가 안 끼워졌어요. 정지 시간이 길어지고 있어요.',choices:[
    {label:'침착하게 기다린다',fixed:{delta:2,eff:{rep:2}}},
-   {label:'무전으로 화를 낸다',fixed:{delta:2,eff:{fans:2,rep:-3}}}]},
+   {label:'무전으로 화를 낸다',fixed:{delta:2,eff:{fans:2,morale:-3}}}]},
  {id:'brake',title:'브레이크 온도가 치솟아요',desc:'이대로면 브레이크가 터질 수도 있어요.',choices:[
    {label:'브레이크를 아껴 탄다',stat:'tyre',good:[0,1],bad:[1,2]},
    {label:'그대로 밀어붙인다',stat:'race',good:[-1,0],bad:[1,3],dnf:.15}]},
@@ -2749,51 +2749,51 @@ const EVENTS=[
  {id:'kartschool',cat:'팬',stage:'f1',title:'내 이름을 건 카트 아카데미',desc:'어린 선수들을 위한 카트 아카데미를 열자는 제안이 왔어요.',choices:[{label:'연다',desc:'업계의 존경을 받아요',eff:{fans:6,rep:2,morale:-3}},{label:'은퇴 후로 미룬다',desc:'지금은 레이스가 먼저',eff:{morale:1}}]}
 ];
 
-// every option costs something: rest costs sharpness, work costs stamina, fame costs focus
+// every option costs something: gains are stats, fans or rep; costs are stamina or sharpness (fans and rep never trade for each other)
 const EV_FIX={
- sign:[{fans:6,morale:-4},{stats:{consistency:1},fans:-3}],
- wedding:[{morale:5,rep:-3},{stats:{consistency:1},morale:-6}],
+ sign:[{fans:6,morale:-4},{stats:{consistency:1},morale:-2}],
+ wedding:[{morale:5,stats:{tyre:-1}},{stats:{consistency:1},morale:-6}],
  move:[{morale:4,stats:{quali:-1}},{stats:{quali:1},morale:-4}],
  sim:[{stats:{quali:2},morale:-3},{stats:{race:1},morale:-1}],
  wet:[{stats:{wet:3},morale:-5},{morale:3,stats:{wet:-1}}],
- press:[{fans:5,rep:-4},{rep:3,fans:-2}],
- sns:[{fans:7,morale:-3},{stats:{mental:1},fans:-2}],
+ press:[{fans:5,morale:-3},{rep:3,morale:-1}],
+ sns:[{fans:7,morale:-3},{stats:{mental:1},morale:-2}],
  coach:[{stats:{consistency:2},morale:-6},{morale:2,stats:{consistency:-1}}],
  setup:[{stats:{tyre:3,quali:-2}},{stats:{quali:1,tyre:-1}}],
- home:[{morale:4,stats:{race:-1}},{stats:{race:1},fans:-2}],
+ home:[{morale:4,stats:{race:-1}},{stats:{race:1},morale:-2}],
  school:[{morale:3,stats:{consistency:-1}},{stats:{consistency:2},morale:-5}],
- mate:[{rep:3,stats:{mental:-1}},{fans:5,rep:-5}],
- sponsor:[{rep:4,morale:-5},{rep:-4,morale:3}],
+ mate:[{rep:3,stats:{mental:-1}},{fans:5,morale:-4}],
+ sponsor:[{rep:4,morale:-5},{morale:3,stats:{quali:-1}}],
  fitness:[{stats:{consistency:2},morale:-5},{morale:2,stats:{consistency:-1}}],
  slump:[{morale:6,stats:{quali:-1}},{stats:{mental:2},morale:-5}],
  friends:[{morale:6,stats:{consistency:-2}},{stats:{consistency:1},morale:-4}],
  routine:[{morale:3,stats:{consistency:-1}},{stats:{mental:2},morale:-2}],
- fanclub:[{fans:8,morale:-4},{morale:1,fans:-3}],
+ fanclub:[{fans:8,morale:-4},{fans:2,morale:-1}],
  kidfan:[{fans:6,morale:-3},{fans:2,morale:-1}],
  dad:[{morale:5,stats:{quali:-1}},{stats:{quali:1},morale:-4}],
  sibling:[{morale:4,stats:{race:-1}},{stats:{race:1},morale:-4}],
- charity:[{fans:6,morale:-4},{morale:1,fans:-2}],
+ charity:[{fans:6,morale:-4},{rep:2,morale:-1}],
  esports:[{stats:{quali:1},morale:-5},{stats:{consistency:1},morale:-2}],
- gt3ring:[{stats:{race:1},rep:-4},{rep:3,fans:-2}],
- rally:[{stats:{wet:2},morale:-4},{morale:2,fans:-1}],
- docu:[{fans:10,morale:-5},{rep:1,fans:-3}],
- leaveme:[{stats:{mental:2},rep:-4},{rep:2,stats:{mental:-1}}],
- starmate:[{stats:{race:1},rep:-3},{stats:{tyre:1},morale:-2}],
+ gt3ring:[{stats:{race:1},morale:-4},{rep:3,morale:-1}],
+ rally:[{stats:{wet:2},morale:-4},{morale:2,stats:{wet:-1}}],
+ docu:[{fans:10,morale:-5},{rep:2,morale:-1}],
+ leaveme:[{stats:{mental:2},morale:-4},{rep:2,stats:{mental:-1}}],
+ starmate:[{stats:{race:1},morale:-3},{stats:{tyre:1},morale:-2}],
  legend:[{stats:{mental:2},morale:-5},{morale:2,stats:{mental:-1}}],
- engineer:[{stats:{tyre:1,consistency:-1}},{morale:1,rep:-4}],
+ engineer:[{stats:{tyre:1,consistency:-1}},{stats:{consistency:1},morale:-4}],
  upgrade:[{stats:{quali:2,consistency:-2}},{stats:{consistency:1,quali:-1}}],
- hate:[{fans:3,morale:-6},{morale:3,fans:-4}],
- tvshow:[{fans:10,morale:-5},{stats:{consistency:1},fans:-2}],
- rookietest:[{rep:4,morale:-5},{stats:{consistency:2},rep:-2}],
- rivalacad:[{fans:2,rep:-3},{rep:3,fans:-1}],
+ hate:[{fans:3,morale:-6},{morale:3,stats:{mental:-1}}],
+ tvshow:[{fans:10,morale:-5},{stats:{consistency:1},morale:-2}],
+ rookietest:[{rep:4,morale:-5},{stats:{consistency:2},morale:-3}],
+ rivalacad:[{fans:2,stats:{mental:1},morale:-3},{rep:3,morale:-1}],
  paydriver:[{fans:3,morale:-5},{morale:2,stats:{race:-1}}],
  cycling:[{stats:{consistency:2},morale:-3},{stats:{consistency:1},morale:-1}],
  heat:[{stats:{consistency:2},morale:-5},{morale:2,stats:{consistency:-1}}],
- bosspress:[{fans:4,rep:-4},{stats:{mental:2},morale:-4}],
- helmetvote:[{fans:7,morale:-3},{stats:{mental:1},fans:-2}],
- mechanic:[{rep:4,stats:{mental:-1}},{stats:{mental:1},rep:-5}],
- simdev:[{rep:4,morale:-6},{morale:2,rep:-3}],
- kartschool:[{fans:6,morale:-5},{morale:1,fans:-2}]
+ bosspress:[{fans:4,morale:-3},{stats:{mental:2},morale:-4}],
+ helmetvote:[{fans:7,morale:-3},{stats:{mental:1},morale:-2}],
+ mechanic:[{rep:4,stats:{mental:-1}},{stats:{mental:1},morale:-3}],
+ simdev:[{rep:4,morale:-6},{morale:2,stats:{quali:-1}}],
+ kartschool:[{fans:6,morale:-5},{stats:{consistency:1},morale:-2}]
 };
 EVENTS.forEach(e=>{const f=EV_FIX[e.id];if(f)f.forEach((x,i)=>{if(e.choices[i])e.choices[i].eff=x})});
 EVENTS.forEach(e=>e.choices.forEach(c=>{if(c.eff&&c.eff.fans>0)c.eff.fans=Math.max(1,Math.round(c.eff.fans*.6))}));

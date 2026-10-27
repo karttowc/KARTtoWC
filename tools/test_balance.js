@@ -2,8 +2,8 @@ const el=()=>({classList:{toggle(){},add(){},remove(){}},addEventListener(){},qu
 global.Image=function(){};global.document={getElementById:()=>el(),createElement:()=>({getContext:()=>null}),fonts:null,body:{appendChild(){}}};
 global.window={scrollTo(){}};global.localStorage={getItem(){return null},setItem(){},removeItem(){}};
 const fs=require('fs');eval(fs.readFileSync(require('path').join(__dirname,'../build/game.js'),'utf8')+`
-let smart=false; // half the careers follow the training recommendation every season, half keep their first pick
-function quickSeason(){S.train=S.p.morale<40?'rest':'focus';if(smart&&S.train==='focus')S.p.focus=recStats().map(r=>r.k);startSeason();if(S.season.gacha)resolveGacha(Math.random()<.5);S.season.incidents.forEach(i=>applyIncident(i,ri(0,1)));finishSeason()}
+let smart=false; // half the careers add the recommended stat every season (keeping their other pick), half keep their first pick
+function quickSeason(){S.train=S.p.morale<40?'rest':'focus';if(smart&&S.train==='focus'){const r=recStats()[0].k;S.p.focus=[r,...S.p.focus.filter(k=>k!==r&&S.p.stats[k]<99)].slice(0,2)}startSeason();if(S.season.gacha)resolveGacha(Math.random()<.5);S.season.incidents.forEach(i=>applyIncident(i,ri(0,1)));finishSeason()}
 
 let res={n:0,f1:0,ch1:0,ch5:0,debut:[],seasons:0};
 for(let i=0;i<300;i++){smart=i%2===0;

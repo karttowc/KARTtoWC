@@ -2,7 +2,7 @@ const el=()=>({classList:{toggle(){},add(){},remove(){}},addEventListener(){},qu
 global.Image=function(){};global.document={getElementById:()=>el(),createElement:()=>({getContext:()=>null}),fonts:null,body:{appendChild(){}}};
 global.window={scrollTo(){}};global.localStorage={getItem(){return null},setItem(){},removeItem(){}};global.setTimeout=()=>0;global.clearTimeout=()=>0;
 const fs=require('fs');eval(fs.readFileSync(require('path').join(__dirname,'../build/game.js'),'utf8')+`
-function quickSeason(){S.train=S.p.morale<40?'rest':'focus';if(S.train==='focus')S.p.focus=recStats().map(r=>r.k);startSeason();if(S.season.gacha)resolveGacha(Math.random()<.5);S.season.incidents.forEach(i=>applyIncident(i,ri(0,1)));finishSeason()}
+function quickSeason(){S.train=S.p.morale<40?'rest':'focus';if(S.train==='focus'){const r=recStats()[0].k;S.p.focus=[r,...S.p.focus.filter(k=>k!==r)].slice(0,2)}startSeason();if(S.season.gacha)resolveGacha(Math.random()<.5);S.season.incidents.forEach(i=>applyIncident(i,ri(0,1)));finishSeason()}
 
 for(let run=0;run<200;run++){
 newGame({name:'T',num:7,nat:'KOR',helmet:randomHelmet(),style:'racer',stats:styleStats(45,'racer'),focus:['race']});

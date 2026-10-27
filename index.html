@@ -4011,7 +4011,7 @@ function recStats(){const p=S.p,st=p.stats,dry=B.race.skill.dry,wet=B.race.skill
     return{k,v:w*Math.max(0,97-st[k])}}).sort((a,b)=>b.v-a.v);
   const why=k=>k==='race'?'결선에서 가장 중요한데 아직 낮아요':k==='tyre'?'레이스 후반 페이스를 지켜 줘요':k==='quali'?(qBad?'예선에서 팀메이트에게 밀렸어요':'출발 위치가 좋아져요'):
     k==='wet'?'비 오는 경기에서 크게 유리해요':k==='consistency'?(dnf?'리타이어가 잦았어요. 실수를 줄여 줘요':'매 랩 실수를 줄여 줘요'):(dnf?'리타이어가 잦았어요. 사고를 줄여 줘요':'압박 속에서도 흔들리지 않아요');
-  return sc.slice(0,2).map(x=>({k:x.k,why:why(x.k)}))}
+  return sc.slice(0,1).map(x=>({k:x.k,why:why(x.k)}))}
 function statSheet(k){const I=STAT_INFO[k];
   return`<div class="sheet" id="sheetBg"><section class="card"><div class="eyebrow">능력치 설명</div><h3 class="h2">${LBL[k]} <span class="num" style="color:var(--accent)">${S.p.stats[k]}</span></h3>
     <p style="margin:0">${I.d}</p><div class="kv"><h3 class="h3">게임에서 쓰이는 곳</h3>${I.u.map(x=>`<div class="row"><span>${x}</span></div>`).join('')}</div>

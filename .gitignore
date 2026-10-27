@@ -2,3 +2,5 @@ build/
 node_modules/
 *.png
 __pycache__/
+!data/avatars_src/*.png
+!data/helmets_src/*.png

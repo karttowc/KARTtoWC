@@ -1977,7 +1977,7 @@ function newGame(o){
       tot:{starts:0,wins:0,podiums:0,poles:0,points:0,titles:0},jr:[],alts:[],f1Teams:{},peak:ovrOf(o.stats),debutYear:null,history:[],retired:false,fans:5,morale:80,rep:10,repBonus:0,val:0,valPeak:0,challenges:[],monaco:false},
     last:null,offers:[],events:[],challenge:null,news:null};
   S.cid=String(Date.now());initJrPool();S.rival=null;scoutInit(S.p);S.events=genEvents();
-  logEv('new',{style:o.style,nat:o.nat,pot:S.p.potential,focus:o.focus});
+  logEv('new',{style:o.style,nat:o.nat,pot:S.p.potential,focus:o.focus,stats:o.stats});
   save();
 }
 

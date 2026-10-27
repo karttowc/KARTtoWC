@@ -1557,9 +1557,6 @@ const trRatio=k=>TROPHY[k]?.55:.42;
 /* full-body trophy pose; size = figure height. Trophy sits behind the gloves so they look like they grip it */
 function avatarWin(i,h,size,k){const th=Math.round(size*trRatio(k)),top=th-Math.round(size*.08);
   return`<div class="avwin" style="width:${Math.round(size*.62)}px;height:${size+top}px"><span class="awt">${trophyArt(k,th)}</span><img class="avfull" src="${avatarSrc(i,h,true)}" alt="" style="height:${size}px"></div>`}
-/* best trophy of the career for the pose: F1 > other series > junior; null = none */
-function bestTrophy(p){if(p.tot&&p.tot.titles)return'F1';for(const a of [...p.alts].reverse()){const d=K.alt_series.find(x=>x.name===a.name);if(d&&TROPHY[d.id])return d.id}
-  const j=[...p.jr].reverse().find(j=>JR_LBL[j.series]);return j?j.series:null}
 function sLogo(sid,h=14){return SLOGO[sid]?`<img src="${SLOGO[sid]}" alt="" style="height:${h}px;width:auto;vertical-align:-2px;margin-right:6px">`:''}
 const TROPHY_IMG={};for(const k in TROPHY){const i=new Image();i.src=TROPHY[k];TROPHY_IMG[k]=i}
 const LOGO_IMG={};K.teams.forEach(k=>{if(k.logo){const i=new Image();i.src=k.logo;LOGO_IMG[k.id]=i}});
@@ -2056,15 +2053,12 @@ function drawCard(){
   g.fillStyle='#AEB4C2';g.font=`500 34px ${F}`;g.fillText('카트부터 월챔까지',80,110);g.textAlign='right';g.fillText(`${D.first}–${D.last}`,W-80,110);g.textAlign='left';
   g.fillStyle='#F2C14E';g.font=`700 190px ${N}`;g.fillText(String(p.peak),76,330);g.font=`700 34px ${N}`;g.fillText('PEAK OVR',84,380);
   g.fillStyle='#fff';g.font=`700 52px ${N}`;g.fillText('#'+p.num,84,450);g.fillStyle='#AEB4C2';g.font=`500 32px ${F}`;g.fillText(natName(p.nat),84,500);
-  // driver (trophy pose with the career's best trophy, standing if none) + helmet
+  // driver ID photo (top of the standing sprite, like .avface) + helmet
   g.fillStyle='rgba(255,255,255,.06)';rr(g,500,150,420,330,40);g.fill();
-  const bt=bestTrophy(p),av=avatarCanvas(pAv(p),p.helmet,!!bt);
-  if(av){drawHelmet(g,p.helmet,p.num,730,312,7);
-    const fh=bt?260:300,fw=fh*av.w/av.h,cx=640,fb=470;
-    if(bt){const th=fh*trRatio(bt),ty=fb-fh-th+fh*.08;
-      if(imOK(bt)){const tw=th*TROPHY_IMG[bt].naturalWidth/TROPHY_IMG[bt].naturalHeight;g.drawImage(TROPHY_IMG[bt],cx-tw/2,ty,tw,th)}
-      else if(JR_LBL[bt])drawJr(g,bt,cx-th/2,ty+th,th)}
-    g.drawImage(av.canvas,cx-fw/2,fb-fh,fw,fh)}
+  const av=avatarCanvas(pAv(p),p.helmet);
+  if(av){const bx=522,by=200,bs=230,iw=bs*.84,ih=iw*av.h/av.w;
+    g.save();rr(g,bx,by,bs,bs,36);g.fillStyle='#25282F';g.fill();g.clip();g.drawImage(av.canvas,bx+(bs-iw)/2,by+bs*.05,iw,ih);g.restore();
+    drawHelmet(g,p.helmet,p.num,758,248,6.5)}
   else drawHelmet(g,p.helmet,p.num,530,180,15);
   g.fillStyle='#fff';g.textAlign='center';
   g.font=`700 92px ${F}`;g.fillText(p.name,W/2,620);

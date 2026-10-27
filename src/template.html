@@ -2195,7 +2195,7 @@ function retiredView(){
     <button class="btn" type="button" id="newCareer">한 번 더 하기</button>
     <div class="grid2" style="grid-template-columns:1fr 1fr"><button class="btn ghost" type="button" id="tHof">랭킹</button><button class="btn ghost" type="button" id="replayCer">은퇴식 보기</button></div>
   </section>
-  ${recordsBody()}`;
+  ${recordsBody()}${logBtn()?`<section class="card">${logBtn()}<p class="muted" style="margin:0;font-size:12px">인터넷이 막혀 기록을 못 보냈어요. 파일을 받아 개발자에게 전해 주면 밸런스에 써요.</p></section>`:''}`;
 }
 function shareText(){const p=S.p,T=p.tot,s=similarDriver(),last=p.history.at(-1);
   return`🏁 카트부터 월챔까지\n${p.name} · ${S.startYear}–${last?last.year:S.year} · ${p.age}세 은퇴\n${T.titles?`🏆 월드 챔피언 ${T.titles}회 · `:''}F1 ${T.wins}승 · 포디움 ${T.podiums} · 최고 무대 ${bestStage(p)}\n${s.r.n}${wa(s.r.n)} 유사합니다!\nhttps://karttowc.github.io`}
@@ -2396,6 +2396,11 @@ function logSeason(rec){const p=S.p,c=currentLine(),Z=S.season||{},L=S.logPre||{
 function logRetire(){const p=S.p,t=p.tot;
   logEv('retire',{year:S.year,age:p.age,seasons:p.history.length,debut:p.debutYear||null,f1s:p.history.filter(h=>h.sid==='F1'&&h.role==='race').length,titles:t.titles,wins:t.wins,podiums:t.podiums,starts:t.starts,
     peak:p.peak,pot:p.potential,style:p.style,fans:p.fans,earn:p.earn||0,path:p.history.map(h=>h.lk+(h.role==='reserve'?'r':'')).join('>'),ch:(p.challenges||[]).map(c=>c.id+':'+c.res)})}
+// blocked networks (e.g. a work PC): hand the unsent queue over as a file instead
+function logDownload(){const q=logQ();if(!q.length)return;const name=`kart-to-wc-log-${logUid().slice(0,6)}-${Date.now()}.json`,data=JSON.stringify(q);
+  if(DL){saveFile(name,data);return}
+  try{const u=URL.createObjectURL(new Blob([data],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('기록 파일을 받았어요')}catch(e){toast('파일을 받지 못했어요')}}
+const logBtn=()=>!logOff()&&logQ().length?`<button class="btn ghost" type="button" id="logDl">플레이 기록 파일 받기 (못 보낸 기록 ${logQ().length}개)</button>`:'';
 setTimeout(logFlush,3000);
 /* ---------- online ranking (Supabase) ---------- */
 const SB_URL='https://nylfktkmicqqlgkjfvyg.supabase.co/rest/v1/ranking',SB_KEY='sb_publishable_oIyy0JrrciMA_g_iX70j_A_coEepIDF',RK_VER='0.21.0';
@@ -2832,6 +2837,7 @@ function menuSheet(){
     `${S.phase!=='progress'?'<button class="btn ghost" type="button" id="askRetire">은퇴하기</button>':''}<button class="btn ghost" type="button" id="askNew" style="color:var(--bad)">새 커리어 시작</button>`}
     <button class="btn ghost" type="button" id="toTitle">타이틀 화면으로</button>
     <button class="btn ghost" type="button" id="logToggle">익명 플레이 기록 보내기: ${logOff()?'끔':'켬'}</button>
+    ${logBtn()}
     <p class="muted" style="margin:0;font-size:12px">시즌 결과·선택 같은 플레이 기록을 이름 없이 익명으로 모아 밸런스 조정에 써요.</p>
     <p class="muted" style="margin:0;font-size:12px">비공식 팬 게임이에요. 수익을 내지 않으며 F1·FIA·각 팀과 관련이 없어요. 팀명·로고·선수명 등 상표는 각 소유자의 것이에요.</p>
     <button class="btn" type="button" id="closeSheet">닫기</button></section></div>`;
@@ -2921,6 +2927,7 @@ root.addEventListener('click',e=>{
   if(d.rk){rkTab=d.rk;if(rkTab==='all'&&!rkAll)rkLoad();render();return}
   if(id==='rkRetry'){rkLoad();render();return}
   if(id==='hofClose'){hofOpen=false;render();return}
+  if(id==='logDl'){logDownload();return}
   if(id==='logToggle'){if(logOff())lsSet('k2wc-log-off','0');else{lsSet('k2wc-log-off','1');lsSet(KEYL,'[]')}render();return}
   if(id==='toTitle'){sheet=null;title=true;render();window.scrollTo(0,0);return}
   if(id==='closeSheet'){if(sheetBack){sheet=sheetBack;sheetBack=null;render();return}sheet=null;chain=false;evPick=null;trPick=null;render();return}

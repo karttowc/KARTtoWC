@@ -1,17 +1,20 @@
 """Fetch the anonymous play log (Google Sheet via Apps Script) and print a quick summary.
-Usage: LOG_KEY=... python3 tools/logs.py [out.json]
-  The key is the Apps Script KEY (not committed). Raw rows are saved to out.json (default play_logs.json, gitignored).
+Usage: LOG_KEY=... python3 tools/logs.py [log files...]
+  The key is the Apps Script KEY (not committed). Log files = "플레이 기록 파일 받기" downloads (unsent queue), merged in.
+  Without LOG_KEY only the files are used. Merged records are saved to play_logs.json (gitignored).
 """
 import os,sys,json,urllib.request,urllib.parse,collections
 URL='https://script.google.com/macros/s/AKfycbwQLNST9m47Rbh9GRou9a2Yrl0L0cYt8ImopVt-ZC0TKSZcxVAWrTCNkuFCChwJuKIE/exec'
-key=os.environ.get('LOG_KEY') or sys.exit('LOG_KEY env var needed')
-out=sys.argv[1] if len(sys.argv)>1 else 'play_logs.json'
-rows=json.load(urllib.request.urlopen(URL+'?key='+urllib.parse.quote(key)))
+key=os.environ.get('LOG_KEY');files=sys.argv[1:]
+if not key and not files:sys.exit('LOG_KEY env var or log files needed')
 recs=[]
-for r in rows:
-    try:recs.append(json.loads(r[4]))
-    except Exception:pass
-json.dump(recs,open(out,'w'),ensure_ascii=False)
+if key:
+    for r in json.load(urllib.request.urlopen(URL+'?key='+urllib.parse.quote(key))):
+        try:recs.append(json.loads(r[4]))
+        except Exception:pass
+for f in files:recs+=json.load(open(f))
+seen=set();recs=[d for d in recs if not((d.get('uid'),d.get('t'),d.get('kind')) in seen or seen.add((d.get('uid'),d.get('t'),d.get('kind'))))]
+json.dump(recs,open('play_logs.json','w'),ensure_ascii=False)
 K=collections.defaultdict(list)
 for d in recs:K[d.get('kind')].append(d)
 print(f"records {len(recs)} · players {len({d['uid'] for d in recs})} · careers {len({d['cid'] for d in recs})} (new {len(K['new'])}, retired {len(K['retire'])})")

@@ -294,7 +294,8 @@
   "f1_debut_extra": 15.5,
   "debut_age_penalty_from": 25,
   "debut_age_penalty_per_year": 2,
-  "rookie_adapt": 3
+  "rookie_adapt": 3,
+  "champ_hunt": {"cars": 2, "chance": 0.5}
  },
  "super_licence": {
   "min_age": 18,

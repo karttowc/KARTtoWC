@@ -29,6 +29,18 @@ if S:
     if ch:print('challenge go/no:',dict(collections.Counter(c.split(':')[1] for c in ch)))
     ev=collections.Counter(e for d in S for e in d.get('ev') or [])
     if ev:print('event picks (id:choice):',dict(ev.most_common()))
+    # per-stat change: in season (growth + break gamble) = stats - s0; preseason (events) = s0 - previous season's stats
+    prev={};pre=collections.Counter();ins=collections.Counter();cnt=0
+    for d in sorted(S,key=lambda d:(d['cid'],d['year'])):
+        s0=d.get('s0')
+        if s0:
+            cnt+=1
+            for k,v in d['stats'].items():ins[k]+=v-s0[k]
+            p=prev.get(d['cid'])
+            if p:
+                for k in s0:pre[k]+=s0[k]-p[k]
+        prev[d['cid']]=d['stats']
+    if cnt:print('avg stat change / season (in season):',{k:round(v/cnt,2) for k,v in ins.items()});print('total preseason change:',dict(pre))
     ga=collections.Counter((d.get('ga') or '').split(':')[1] for d in S if d.get('ga'))
     if ga:print('break gamble:',dict(ga))
 # where careers stop: last series of careers with no retire record

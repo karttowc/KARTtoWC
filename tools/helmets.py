@@ -72,12 +72,36 @@ for i in range(1):
       yc=mid[prev]+((mid[nxt]-mid[prev])*(x-prev)/(nxt-prev) if nxt else slope*(x-prev))
       for y in range(round(yc-th/2+.01),round(yc-th/2+.01)+th):
         if 0<=y<h and cls(px[x,y]) in 'Gg':px[x,y]=mc
+  # very dark shell-green blend pixels (edge shading) -> outline black, so they don't turn into odd dark dots after recolouring
+  for y in range(h):
+    for x in range(W):
+      r_,g_,b_,a_=px[x,y]
+      if a_ and max(r_,g_,b_)<70 and g_>r_+12 and g_>b_+8:px[x,y]=(14,15,18,255)
+  # stray visor-cyan pixels away from the visor -> neighbour colour; single-pixel holes in the pinstripe -> stripe colour
+  for y in range(h):
+    for x in range(W):
+      q=px[x,y];hq,lq,sq=colorsys.rgb_to_hls(q[0]/255,q[1]/255,q[2]/255)
+      if q[3] and max(q[:3])>=70 and sq>.2 and .42<=hq<.6 and sum(cls(px[x+a,y+b2])=='C' for a in range(-3,4) for b2 in range(-3,4) if 0<=x+a<W and 0<=y+b2<h)<6:
+        nb=[px[x+a,y+b2] for a in (-1,0,1) for b2 in (-1,0,1) if (a or b2) and 0<=x+a<W and 0<=y+b2<h and cls(px[x+a,y+b2]) in 'GgM']
+        if nb:px[x,y]=Counter(nb).most_common(1)[0][0]
+  for y in range(1,h-1):
+    for x in range(1,W-1):
+      if cls(px[x,y]) in 'Gg' and (cls(px[x-1,y])=='M' and cls(px[x+1,y])=='M' or cls(px[x,y-1])=='M' and cls(px[x,y+1])=='M'):
+        px[x,y]=px[x-1,y] if cls(px[x-1,y])=='M' else px[x,y-1]
   # crisp black outline: every opaque pixel touching transparency (8-neighbourhood) becomes outline black
   K=(14,15,18,255);edge=[]
   for y in range(h):
     for x in range(W):
       if px[x,y][3] and any(not(0<=x+a<W and 0<=y+b2<h) or not px[x+a,y+b2][3] for a in (-1,0,1) for b2 in (-1,0,1)):edge.append((x,y))
   for x,y in edge:px[x,y]=K
-  b=io.BytesIO();s.quantize(96,method=Image.FASTOCTREE).save(b,'PNG',optimize=True);out.append('data:image/png;base64,'+base64.b64encode(b.getvalue()).decode())
+  # palette reduction can merge a few blend pixels into an off-key colour: snap those to a neighbour afterwards
+  s=s.quantize(96,method=Image.FASTOCTREE).convert('RGBA');px=s.load()
+  for y in range(h):
+    for x in range(W):
+      q=px[x,y]
+      if q[3] and cls(q) in 'oC' and max(q[:3])>=70 and sum(cls(px[x+a,y+b2])=='C' for a in range(-3,4) for b2 in range(-3,4) if 0<=x+a<W and 0<=y+b2<h)<6:
+        nb=[px[x+a,y+b2] for a in (-1,0,1) for b2 in (-1,0,1) if (a or b2) and 0<=x+a<W and 0<=y+b2<h and cls(px[x+a,y+b2]) in 'GM']
+        if nb:px[x,y]=Counter(nb).most_common(1)[0][0]
+  b=io.BytesIO();s.save(b,'PNG',optimize=True);out.append('data:image/png;base64,'+base64.b64encode(b.getvalue()).decode())
 (R/'data/helmets.json').write_text(json.dumps(out),encoding='utf-8')
 print(len(out),'helmet',sum(len(x) for x in out)//1024,'KB')

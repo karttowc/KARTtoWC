@@ -2053,13 +2053,11 @@ function drawCard(){
   g.fillStyle='#AEB4C2';g.font=`500 34px ${F}`;g.fillText('카트부터 월챔까지',80,110);g.textAlign='right';g.fillText(`${D.first}–${D.last}`,W-80,110);g.textAlign='left';
   g.fillStyle='#F2C14E';g.font=`700 190px ${N}`;g.fillText(String(p.peak),76,330);g.font=`700 34px ${N}`;g.fillText('PEAK OVR',84,380);
   g.fillStyle='#fff';g.font=`700 52px ${N}`;g.fillText('#'+p.num,84,450);g.fillStyle='#AEB4C2';g.font=`500 32px ${F}`;g.fillText(natName(p.nat),84,500);
-  // driver ID photo (top of the standing sprite, like .avface) + helmet
-  g.fillStyle='rgba(255,255,255,.06)';rr(g,500,150,420,330,40);g.fill();
+  // driver ID photo (top of the standing sprite, like .avface); helmet only if the sprite isn't ready
   const av=avatarCanvas(pAv(p),p.helmet);
-  if(av){const bx=522,by=200,bs=230,iw=bs*.84,ih=iw*av.h/av.w;
-    g.save();rr(g,bx,by,bs,bs,36);g.fillStyle='#25282F';g.fill();g.clip();g.drawImage(av.canvas,bx+(bs-iw)/2,by+bs*.05,iw,ih);g.restore();
-    drawHelmet(g,p.helmet,p.num,758,248,6.5)}
-  else drawHelmet(g,p.helmet,p.num,530,180,15);
+  if(av){const bx=560,by=150,bs=330,iw=bs*.84,ih=iw*av.h/av.w;
+    g.save();rr(g,bx,by,bs,bs,44);g.fillStyle='#25282F';g.fill();g.clip();g.imageSmoothingQuality='high';g.drawImage(av.canvas,bx+(bs-iw)/2,by+bs*.05,iw,ih);g.restore()}
+  else{g.fillStyle='rgba(255,255,255,.06)';rr(g,500,150,420,330,40);g.fill();drawHelmet(g,p.helmet,p.num,530,180,15)}
   g.fillStyle='#fff';g.textAlign='center';
   g.font=`700 92px ${F}`;g.fillText(p.name,W/2,620);
   g.fillStyle='#AEB4C2';g.font=`500 34px ${F}`;g.fillText(`${D.seasons}시즌 · F1 ${D.teams.length}개 팀 · ${p.age}세 은퇴 · 통산 수익 ${won(p.earn||0)}`,W/2,680);

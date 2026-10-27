@@ -7,7 +7,7 @@ import pathlib,json,base64,io
 from collections import deque
 from PIL import Image
 R=pathlib.Path(__file__).resolve().parent.parent
-H=200
+H=420  # sprite height; high enough for the card photo (bust crop) to stay sharp
 def cut(pat,dst):
  out=[]
  for sh in sorted((R/'data/avatars_src').glob(pat)):
@@ -88,7 +88,7 @@ def cut(pat,dst):
                for b2 in (-1,0,1):
                  n=(u+a,v+b2)
                  if n not in vs and 0<=n[0]<cw and 0<=n[1]<ch and cp[n][3]:vs.add(n);st.append(n)
-           if len(isl)<12:
+           if len(isl)<12*(H//200)**2:
              for n in isl:cp[n]=(0,0,0,0)
        b=io.BytesIO();cell.quantize(128,method=Image.FASTOCTREE).save(b,'PNG',optimize=True);out.append('data:image/png;base64,'+base64.b64encode(b.getvalue()).decode())
  (R/dst).write_text(json.dumps(out),encoding='utf-8')

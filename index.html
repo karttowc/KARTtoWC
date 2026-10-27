@@ -3342,7 +3342,6 @@ function cardTrophies(p,F){
   if(tripleCrown())TI.push({pill:'트리플 크라운'});
   p.alts.forEach(a=>{const d=K.alt_series.find(x=>x.name===a.name);if(d&&TROPHY[d.id])TI.push({k:d.id,h:215,y:a.year})});
   p.challenges.filter(c=>c.res==='우승').forEach(c=>TI.push({pill:`${c.name} 우승`}));
-  if(p.monaco)TI.push({pill:'모나코 우승'});
   p.jr.filter(j=>JR_LBL[j.series]).forEach(j=>TI.push({jr:j.series,h:125,y:j.year}));
   const mg=document.createElement('canvas').getContext('2d');let s=1,tot=0,rowH=0;
   if(TI.length){if(mg)mg.font=`700 34px ${F}`;

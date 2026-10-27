@@ -58,6 +58,26 @@ for i in range(1):
     for x in range(0,min(W,(L[y] or 0)+16)):
       k=cls(px[x,y])
       if k in 'GM' and main[k] and lum(px[x,y])<lum(main[k])*.9:px[x,y]=main[k]+(255,)
+  # pinstripe: fill gaps along its path up to the front edge (fit y per column from the magenta pixels)
+  col={}
+  for y in range(h):
+    for x in range(W):
+      if cls(px[x,y])=='M':col.setdefault(x,[]).append(y)
+  if col:
+    xs=sorted(col);mid={x:sum(col[x])/len(col[x]) for x in xs};th=max(1,round(sum(len(col[x]) for x in xs)/len(xs)))
+    last=xs[-6:];slope=(mid[last[-1]]-mid[last[0]])/max(1,last[-1]-last[0]);mc=Counter(px[x,y] for x in xs for y in col[x]).most_common(1)[0][0]
+    for x in range(xs[0],W):
+      if x in col:continue
+      prev=max(k for k in xs if k<x);nxt=min((k for k in xs if k>x),default=None)
+      yc=mid[prev]+((mid[nxt]-mid[prev])*(x-prev)/(nxt-prev) if nxt else slope*(x-prev))
+      for y in range(round(yc-th/2+.01),round(yc-th/2+.01)+th):
+        if 0<=y<h and cls(px[x,y]) in 'Gg':px[x,y]=mc
+  # crisp black outline: every opaque pixel touching transparency (8-neighbourhood) becomes outline black
+  K=(14,15,18,255);edge=[]
+  for y in range(h):
+    for x in range(W):
+      if px[x,y][3] and any(not(0<=x+a<W and 0<=y+b2<h) or not px[x+a,y+b2][3] for a in (-1,0,1) for b2 in (-1,0,1)):edge.append((x,y))
+  for x,y in edge:px[x,y]=K
   b=io.BytesIO();s.quantize(96,method=Image.FASTOCTREE).save(b,'PNG',optimize=True);out.append('data:image/png;base64,'+base64.b64encode(b.getvalue()).decode())
 (R/'data/helmets.json').write_text(json.dumps(out),encoding='utf-8')
 print(len(out),'helmet',sum(len(x) for x in out)//1024,'KB')

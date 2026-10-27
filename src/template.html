@@ -2308,17 +2308,22 @@ function obInit(){
   ob={step:1,name:'',num:ri(2,99),nat:'KOR',av:avDefault('KOR'),avPick:false,helmet:randomHelmet(),style:null,cands:c,focus:[]};
 }
 function obView(){
-  const steps=`<div class="steps">${[1,2,3].map(i=>`<i class="${i<=ob.step?'on':''}"></i>`).join('')}</div>`;
+  const steps=`<div class="steps">${[1,2,3,4].map(i=>`<i class="${i<=ob.step?'on':''}"></i>`).join('')}</div>`;
+  const hero=`<section class="obhero"><div class="obstage">${avatar(ob.av,ob.helmet,150,true)}</div><div class="obtag">${helmet(ob.helmet,ob.num,64)}<b class="num">#${esc(ob.num)}</b><span>${esc(ob.name.trim()||(ob.step===1?'':'이름 없음'))}</span><em>${ob.step===1?'':esc(K.nationalities[ob.nat]||'')}</em></div></section>`;
   if(ob.step===1)return`<header class="top"><span></span>${steps}<button class="iconbtn" type="button" id="obRandom">랜덤</button></header>
-    <div><div class="eyebrow">${B.driver.start_age}세, 카트에서 시작해요</div><h2 class="h2">어떤 드라이버로<br>살아볼까요?</h2></div>
-    <section class="obhero"><div class="obstage">${avatar(ob.av,ob.helmet,150,true)}</div><div class="obtag">${helmet(ob.helmet,ob.num,64)}<b class="num">#${esc(ob.num)}</b><span>${esc(ob.name.trim()||'이름 없음')}</span><em>${esc(K.nationalities[ob.nat]||'')}</em></div></section>
+    <div><div class="eyebrow">${B.driver.start_age}세, 카트에서 시작해요</div><h2 class="h2">먼저 헬멧부터<br>꾸며 볼까요?</h2><p class="muted" style="margin:6px 0 0">슈트 색도 헬멧 색을 따라가요.</p></div>
+    ${hero}
+    <section class="card">${helmetEditor(ob.helmet)}</section>
+    <button class="btn" type="button" id="obNextH">다음</button><p class="muted" style="margin:4px 0 0;font-size:12px;text-align:center">비공식 팬 게임이에요. 수익을 내지 않으며 F1·FIA·각 팀과 관련이 없어요. 팀명·로고·선수명 등 상표는 각 소유자의 것이에요.</p>`;
+  if(ob.step===2)return`<header class="top"><button class="iconbtn" type="button" id="obBack">이전</button>${steps}<button class="iconbtn" type="button" id="obRandom">랜덤</button></header>
+    <div><h2 class="h2">어떤 드라이버로<br>살아볼까요?</h2></div>
+    ${hero}
+    <section class="card"><div class="avgrid">${AVATAR.map((_,i)=>`<button class="avopt" type="button" data-av="${i}" aria-pressed="${i===ob.av}" aria-label="드라이버 ${i+1}">${avatar(i,ob.helmet,64)}</button>`).join('')}</div></section>
     <section class="card"><div class="grid2"><label class="lbl" for="obName">이름<input class="field" id="obName" maxlength="12" placeholder="이름" value="${esc(ob.name)}"></label>
       <label class="lbl" for="obNum">차량 번호<input class="field num" id="obNum" type="number" min="2" max="99" value="${ob.num}"></label></div>
       <label class="lbl" for="obNat">국적<select class="field" id="obNat">${Object.entries(K.nationalities).map(([k,v])=>`<option value="${k}"${k===ob.nat?' selected':''}>${v}</option>`).join('')}</select></label></section>
-    <section class="card"><div class="h3" style="margin:0">헬멧 꾸미기</div><p class="muted" style="margin:-6px 0 0;font-size:13px">슈트 색도 헬멧 색을 따라가요.</p>${helmetEditor(ob.helmet)}</section>
-    <section class="card"><div class="h3" style="margin:0">드라이버</div><div class="avgrid">${AVATAR.map((_,i)=>`<button class="avopt" type="button" data-av="${i}" aria-pressed="${i===ob.av}" aria-label="드라이버 ${i+1}">${avatar(i,ob.helmet,64)}</button>`).join('')}</div>
-    </section><button class="btn" type="button" id="obNext1" ${ob.name.trim()?'':'disabled'}>다음</button><p class="muted" style="margin:4px 0 0;font-size:12px;text-align:center">비공식 팬 게임이에요. 수익을 내지 않으며 F1·FIA·각 팀과 관련이 없어요. 팀명·로고·선수명 등 상표는 각 소유자의 것이에요.</p>`;
-  if(ob.step===2)return`<header class="top"><button class="iconbtn" type="button" id="obBack">이전</button>${steps}<span style="width:56px"></span></header>
+    <button class="btn" type="button" id="obNext1" ${ob.name.trim()?'':'disabled'}>다음</button>`;
+  if(ob.step===3)return`<header class="top"><button class="iconbtn" type="button" id="obBack">이전</button>${steps}<span style="width:56px"></span></header>
     <div><div class="eyebrow">네 후보 모두 능력치 합은 ${B.driver.start_stat_sum}이고, 분포만 달라요.</div><h2 class="h2">드라이버 스타일을 골라 주세요</h2></div>
     ${B.styles.map(s=>{const st=ob.cands[s.id],top=[...STATS].sort((a,b)=>st[b]-st[a]).slice(0,2);return`<button class="choice" type="button" data-style="${s.id}" aria-pressed="${ob.style===s.id}">
       <span class="row"><span class="h3">${s.name}</span><span class="tick">✓</span></span><span class="muted" style="font-size:14px">${s.desc}</span>
@@ -2775,16 +2780,17 @@ root.addEventListener('click',e=>{
   if(t.id==='sheetBg'&&e.target===t){if(sheetBack){sheet=sheetBack;sheetBack=null;render();return}if(PRE(sheet)||sheet&&sheet.type==='chres')return;sheet=null;chain=false;evPick=null;render();return}
   const id=t.id,d=t.dataset;
   // onboarding
-  if(id==='obRandom'){ob.nat=pick(Object.keys(K.nationalities));ob.name=genName(ob.nat);ob.num=ri(2,99);ob.helmet=randomHelmet();ob.av=avDefault(ob.nat);ob.avPick=false;render();return}
+  if(id==='obRandom'){if(ob.step===1)ob.helmet=randomHelmet();else{ob.nat=pick(Object.keys(K.nationalities));ob.name=genName(ob.nat);ob.num=ri(2,99);ob.av=avDefault(ob.nat);ob.avPick=false}render();return}
   if(d.htab){hedTab=d.htab;render();return}
   if(d.av!=null&&ob){ob.av=+d.av;ob.avPick=true;render();return}
   if(d.hb||d.hs||d.hp||d.hv){const tgt=S&&!S.p.retired?S.p:ob;if(!tgt)return;const h=normHelmet(tgt.helmet);
     if(d.hb)h.base=d.hb;if(d.hs)h.sec=d.hs;if(d.hp)h.pat=d.hp;if(d.hv)h.vis=d.hv;tgt.helmet=h;if(S)save();render();return}
   if(id==='hRandom'&&S){S.p.helmet=randomHelmet();save();render();return}
-  if(id==='obNext1'){ob.step=2;render();return}
+  if(id==='obNextH'){ob.step=2;render();window.scrollTo(0,0);return}
+  if(id==='obNext1'){ob.step=3;render();window.scrollTo(0,0);return}
   if(id==='obBack'){ob.step--;render();return}
   if(d.style){ob.style=d.style;render();return}
-  if(id==='obNext2'){ob.step=3;render();return}
+  if(id==='obNext2'){ob.step=4;render();window.scrollTo(0,0);return}
   if(d.focus){const k=d.focus;if(ob.focus.includes(k))ob.focus=ob.focus.filter(x=>x!==k);else if(ob.focus.length<B.driver.max_focus_stats)ob.focus.push(k);render();return}
   if(id==='obDone'){newGame({name:ob.name.trim(),num:ob.num,nat:ob.nat,avatar:ob.av,helmet:ob.helmet,style:ob.style,stats:ob.cands[ob.style],focus:ob.focus});ob=null;tab='home';render();window.scrollTo(0,0);return}
   // game

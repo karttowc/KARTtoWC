@@ -331,7 +331,7 @@ html,body{margin:0}
 .ttl .logo{width:308px;max-width:86vw;image-rendering:pixelated;image-rendering:crisp-edges;filter:drop-shadow(0 6px 24px rgba(240,68,82,.25));animation:bob 2.4s steps(2) infinite}
 @keyframes bob{50%{transform:translateY(-3px)}}
 .ttl .sub{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.14em;font-size:14px;white-space:nowrap;color:var(--gold);margin-top:2px}
-.scene{position:relative;width:100%;height:178px;margin:14px 0 6px;z-index:1}
+.scene{position:relative;width:100vw;align-self:flex-start;height:178px;margin:14px 0 6px calc(50% - 50vw);z-index:1}
 .scene .glow{position:absolute;left:50%;top:-30px;width:320px;height:120px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(255,236,190,.16),transparent 70%)}
 .scene .stand{position:absolute;left:0;right:0;top:18px;height:44px;background:
  repeating-linear-gradient(90deg,transparent 0 6px,rgba(255,214,120,.55) 6px 8px,transparent 8px 14px,rgba(120,170,255,.45) 14px 16px,transparent 16px 22px),
@@ -347,8 +347,9 @@ html,body{margin:0}
 .scene .kart{top:90px;width:72px;animation:drive 7s linear infinite}
 .scene .f1{top:106px;width:128px;animation:drive2 7s linear infinite}
 .scene .f1::before{content:"";position:absolute;right:100%;top:40%;width:90px;height:3px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5));box-shadow:0 8px 0 -0px rgba(255,255,255,.25)}
-@keyframes drive{0%{transform:translateX(-90px)}45%{transform:translateX(520px)}100%{transform:translateX(520px)}}
-@keyframes drive2{0%,50%{transform:translateX(-160px)}72%{transform:translateX(560px)}100%{transform:translateX(560px)}}
+@keyframes drive{0%{transform:translateX(-90px)}45%{transform:translateX(calc(100vw + 20px))}100%{transform:translateX(calc(100vw + 20px))}}
+@keyframes drive2{0%,50%{transform:translateX(-160px)}72%{transform:translateX(calc(100vw + 120px))}100%{transform:translateX(calc(100vw + 120px))}}
+@media (min-width:900px){.scene .kart,.scene .f1{animation-duration:10s}}
 .scene .flagrow{position:absolute;left:0;right:0;bottom:-14px;height:12px;background:conic-gradient(#fff 25%,#111 0 50%,#fff 0 75%,#111 0) 0 0/12px 12px;opacity:.9}
 .ttl .menu{width:100%;display:flex;flex-direction:column;gap:10px;margin-top:22px}
 .ttl .btn small{display:block;font-size:12px;font-weight:500;opacity:.8;margin-top:2px}
@@ -366,7 +367,7 @@ html,body{margin:0}
 .hof .rk{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;width:26px;text-align:center;color:var(--dim)}
 .hof .rk.g{color:var(--gold)}
 .hof .row2.me{background:rgba(242,193,78,.08);border-radius:12px;padding-left:6px;padding-right:6px}
-@media (prefers-reduced-motion:reduce){.scene .car,.ttl .logo,.ttl .stars i{animation:none}.scene .car{transform:translateX(40px)}.scene .f1{transform:translateX(200px)}}
+@media (prefers-reduced-motion:reduce){.scene .car,.ttl .logo,.ttl .stars i{animation:none}.scene .car{transform:translateX(calc(50vw - 150px))}.scene .f1{transform:translateX(calc(50vw - 20px))}}
 
 .celeb{position:fixed;inset:0;z-index:98;background:radial-gradient(circle at 50% 38%,rgba(242,193,78,.28),transparent 60%),#06070C;display:flex;align-items:center;justify-content:center;overflow:hidden;animation:cfade .3s ease-out}
 .celeb.wc{background:radial-gradient(circle at 50% 36%,rgba(242,193,78,.42),rgba(225,6,0,.18) 40%,transparent 70%),#06070C}

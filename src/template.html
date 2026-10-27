@@ -134,6 +134,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 #peek .pkh{display:flex;justify-content:space-between;align-items:baseline}#peek .pkh b.num{font-size:24px}
 #peek .pkr{display:grid;grid-template-columns:72px 1fr 32px;align-items:center;gap:8px;font-size:13px;color:var(--dim)}#peek .pkr .f{color:var(--accent);font-weight:700}#peek .pkr b{color:var(--fg);text-align:right}
 .earn{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--dim)}.earn b{color:var(--fg);font-size:15px}.earn em{font-style:normal;color:var(--gold)}.earn i{font-style:normal;margin-left:auto}
+.mzone{position:relative;height:10px;border-radius:5px;overflow:hidden;margin-top:6px}.mzone i{position:absolute;top:0;bottom:0}.mzone b{position:absolute;top:-2px;bottom:-2px;width:4px;margin-left:-2px;background:var(--fg);border-radius:2px}
+.mzl{position:relative;height:14px;font-size:11px;color:var(--muted)}.mzl span{position:absolute;transform:translateX(-50%)}
+.mlist{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}.mlist .down{color:#FF8A94}
 .kv.nw .row>span:first-child{white-space:nowrap;margin-right:14px}.kv.nw .row>span:last-child{text-align:right}
 .incinfo{font-size:13px;color:var(--dim)}.incinfo summary{cursor:pointer;display:flex;align-items:center;gap:6px;list-style:none}.incinfo summary::-webkit-details-marker{display:none}.incinfo summary svg{width:16px;height:16px;color:#8B93A7}.incinfo p{margin:6px 0 0;line-height:1.5}
 .tshelf{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:10px 14px;padding:12px 8px 0;border-bottom:3px solid #3A3F4B;border-radius:4px}
@@ -1365,19 +1368,23 @@ const GA_REQ={boxing:{age:16},esports:{age:16},simnight:{age:15},kart:{min:'F3'}
 function gaOK(g,p){const q=GA_REQ[g.id];if(!q)return true;
   if(q.min&&LVL(p.series)<LVL(q.min))return false;if(q.max&&LVL(p.series)>LVL(q.max))return false;
   if(q.age&&p.age<q.age)return false;if(q.maxAge&&p.age>q.maxAge)return false;return true}
+// how much stamina comes back at the next off-season (season drain included if it hasn't happened yet)
+function moraleRecover(){const p=S.p,pre=S.phase==='ready'||S.phase==='progress',sd=p.series==='ALT'?altDef(p.alt):seriesDef(p.series);
+  const races=S.season?S.season.races:sd?sd.races:0,a=pre?p.age:p.age-1,a2=a+1;
+  const end=pre?p.morale-Math.round(races*.45*(a>=36?1.6:a>=33?1.3:1)):p.morale,tgt=a2>=36?70:a2>=33?78:85;
+  return Math.round(Math.max(0,end)+(tgt-Math.max(0,end))*.45)-Math.max(0,end)}
 function gachaP(g){return clamp(g.p+(S.p.morale-60)/300,.25,.9)}
 function resolveGacha(go){
   const Z=S.season,G=Z.gacha,g=GACHA.find(x=>x.id===G.id);G.done=true;
   G.go=go;G.res=go?null:'rest';
   if(!go){applyEff({morale:6});save();return{ok:null,t:'쉬면서 체력을 챙겼어요 · 체력 +6'}}
-  applyEff({morale:-6});
-  if(Math.random()<gachaP(g)){G.res='win';const m=applyEff(g.win);save();return{ok:true,t:`성공! ${m} · 체력 -6`}}
+  if(Math.random()<gachaP(g)){G.res='win';const m=applyEff(g.win);save();return{ok:true,t:`성공! ${m}`}}
   G.res=g.slump?'slump':'inj';
   if(g.slump){const o=Z.orders[G.r],i=o.fin.indexOf('me');if(i>=0){const ni=Math.min(o.fin.length-1,i+g.slump);o.fin.splice(i,1);o.fin.splice(ni,0,'me')}
-    applyEff({morale:-4});save();return{ok:false,t:`실패… 피로가 쌓여 다음 레이스 페이스가 떨어져요 · 체력 -10`}}
+    applyEff({morale:-10});save();return{ok:false,t:`실패… 피로가 쌓여 다음 레이스 페이스가 떨어져요 · 체력 -10`}}
   const k=ri(...g.inj);let miss=0;
   for(let r=G.r;r<Math.min(Z.races,G.r+k);r++){const o=Z.orders[r];o.fin=o.fin.filter(x=>x!=='me');o.dnf=o.dnf.filter(x=>x!=='me');o.q=o.q.filter(x=>x!=='me');if(!Z.meAbsent.includes(r)){Z.meAbsent.push(r);miss++}}
-  applyEff({morale:-5});Z.ctx.ev.push(`${g.ev} 중 부상으로 ${miss}경기를 결장했어요.`);save();
+  applyEff({morale:-11});Z.ctx.ev.push(`${g.ev} 중 부상으로 ${miss}경기를 결장했어요.`);save();
   return{ok:false,t:`부상! ${miss}경기 결장 · 체력 -11`};
 }
 function showGacha(){
@@ -1386,7 +1393,7 @@ function showGacha(){
   box.innerHTML=`<div class="sheet"><section class="card"><div class="eyebrow">${f1?'여름 휴식기':'시즌 중반 휴식기'} · 한 번의 도전</div><h3 class="h2">${esc(g.title)}</h3>
     <div class="kv"><div class="row"><span>성공 확률</span><span class="num" style="font-size:22px;color:var(--gold)">${pct}%</span></div>
     <div class="row"><span>성공하면</span><span class="up">${esc(effText(g.win))}</span></div>
-    <div class="row"><span>실패하면</span><span class="down">${g.slump?'다음 레이스 부진':`부상 ${g.inj[0]===g.inj[1]?g.inj[0]:g.inj[0]+'~'+g.inj[1]}경기 결장`}</span></div></div>
+    <div class="row"><span>실패하면</span><span class="down">${g.slump?'다음 레이스 부진 · 체력 -10':`부상 ${g.inj[0]===g.inj[1]?g.inj[0]:g.inj[0]+'~'+g.inj[1]}경기 결장 · 체력 -11`}</span></div></div>
     <button class="btn" type="button" data-gacha="go">도전한다</button><button class="btn ghost" type="button" data-gacha="rest">안전하게 쉰다</button></section></div>`;
 }
 function effChips(e){const a=[];const add=(l,v)=>a.push([v,`<span class="chip ${v>0?'up':'down'}" style="font-size:13px">${l} ${v>0?'+':''}${v}</span>`]);
@@ -2762,15 +2769,12 @@ function sheetView(){
       <div class="row"><span class="down">조건</span><span>하위 1/3이면 경고, 두 번 연속이면 방출돼요.</span></div>
       <div class="row"><span class="down">주의</span><span>다른 팀 관심은 조금씩 식고, 다른 팀 F1 시트로 가면 계약이 끝나요.</span></div></div>
     <button class="btn" type="button" id="closeSheet">닫기</button></section></div>`}
-  if(sheet==='st_morale'){const p=S.p,dr=p.age>=36?'1.6배':p.age>=33?'1.3배':'',tg=p.age>=36?70:p.age>=33?78:85;
-    return`<div class="sheet" id="sheetBg"><section class="card"><div class="eyebrow">체력 설명</div><h3 class="h2">체력 <span class="num" style="color:var(--good)">${p.morale}</span></h3>
-    <p style="margin:0">몸과 마음의 컨디션이에요. 시즌을 뛰면 줄고, 비시즌에 회복돼요.</p>
-    <div class="kv nw"><div class="row"><span>레이스 페이스</span><span>60보다 높으면 빨라지고, 낮으면 느려져요</span></div>
-      <div class="row"><span>40 미만</span><span class="down">지쳐서 실수 · 리타이어 위험</span></div>
-      <div class="row"><span>35 미만</span><span class="down">슬럼프가 올 확률이 커져요</span></div>
-      <div class="row"><span>시즌 중</span><span>경기 수만큼 줄어요${dr?` · 지금 나이엔 ${dr} 빨리`:''}</span></div>
-      <div class="row"><span>비시즌</span><span>${tg} 쪽으로 절반쯤 회복돼요</span></div>
-      <div class="row"><span>선택지</span><span>도전·이벤트로 쓰거나 휴식으로 채워요</span></div></div>
+  if(sheet==='st_morale'){const p=S.p,m=p.morale,rc=moraleRecover(),z=(a,b,c)=>`<i style="left:${a}%;width:${b-a}%;background:${c}"></i>`;
+    return`<div class="sheet" id="sheetBg"><section class="card"><div class="eyebrow">체력 설명</div><h3 class="h2">체력 <span class="num" style="color:var(--good)">${m}</span></h3>
+    <p style="margin:0">시즌 시작 때 체력으로 그 시즌 전체 페이스가 정해져요. 시즌 중간의 체력 증감은 다음 시즌에 적용돼요.</p>
+    <div class="mzone">${z(0,35,'var(--bad)')}${z(35,40,'#FF9F43')}${z(40,60,'var(--line)')}${z(60,100,'var(--good)')}<b style="left:${m}%"></b></div>
+    <div class="mzl"><span style="left:35%">35</span><span style="left:40%">40</span><span style="left:60%">60</span></div>
+    <ul class="mlist"><li>60 위: 페이스 ↑ / 60 아래: 페이스 ↓</li><li class="down">40 아래: 지쳐서 리타이어 위험</li><li class="down">35 아래: 슬럼프 위험</li><li>시즌이 끝나면 일부 회복돼요${rc>0?` (지금이면 +${rc})`:''}</li></ul>
     <button class="btn" type="button" id="closeSheet">닫기</button></section></div>`}
   if(sheet==='newLife')return`<div class="sheet" id="sheetBg"><section class="card" style="text-align:center"><div style="font-size:40px">🏁</div><h3 class="h2">새로운 삶을 시작하겠습니까?</h3>
     <p class="muted" style="margin:0">${esc(S.p.name)}의 커리어는 랭킹에 올라가요. 새 드라이버로 다시 카트부터 시작해요.</p>

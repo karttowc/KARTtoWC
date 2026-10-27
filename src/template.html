@@ -152,6 +152,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .hopt[aria-pressed="true"]{border-color:var(--accent)}
 .obhero{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:4px 16px;border-radius:20px;background:radial-gradient(120% 90% at 30% 20%,#2a3550 0%,#171a22 70%);box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .obhero .helmet{background:none}
+.obhel{justify-content:center;padding:0 16px}
 .avfull{display:block;width:auto;max-width:none;flex:none;image-rendering:pixelated;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
 .avface{flex:none;position:relative;overflow:hidden;border-radius:16px;background:var(--surface-2)}
 .avface img{position:absolute;left:50%;top:5%;width:84%;transform:translateX(-50%);image-rendering:pixelated}
@@ -2309,10 +2310,10 @@ function obInit(){
 }
 function obView(){
   const steps=`<div class="steps">${[1,2,3,4].map(i=>`<i class="${i<=ob.step?'on':''}"></i>`).join('')}</div>`;
-  const hero=`<section class="obhero"><div class="obstage">${avatar(ob.av,ob.helmet,150,true)}</div><div class="obtag">${helmet(ob.helmet,ob.num,64)}<b class="num">#${esc(ob.num)}</b><span>${esc(ob.name.trim()||(ob.step===1?'':'이름 없음'))}</span><em>${ob.step===1?'':esc(K.nationalities[ob.nat]||'')}</em></div></section>`;
+  const hero=`<section class="obhero"><div class="obstage">${avatar(ob.av,ob.helmet,150,true)}</div><div class="obtag">${helmet(ob.helmet,ob.num,64)}<b class="num">#${esc(ob.num)}</b><span>${esc(ob.name.trim()||'이름 없음')}</span><em>${esc(K.nationalities[ob.nat]||'')}</em></div></section>`;
   if(ob.step===1)return`<header class="top"><span></span>${steps}<button class="iconbtn" type="button" id="obRandom">랜덤</button></header>
-    <div><div class="eyebrow">${B.driver.start_age}세, 카트에서 시작해요</div><h2 class="h2">먼저 헬멧부터<br>꾸며 볼까요?</h2><p class="muted" style="margin:6px 0 0">슈트 색도 헬멧 색을 따라가요.</p></div>
-    ${hero}
+    <div><div class="eyebrow">${B.driver.start_age}세, 카트에서 시작해요</div><h2 class="h2">나만의 헬멧을<br>만들어 주세요</h2><p class="muted" style="margin:6px 0 0">슈트 색도 헬멧 색을 따라가요.</p></div>
+    <section class="obhero obhel">${helmet(ob.helmet,null,190)}</section>
     <section class="card">${helmetEditor(ob.helmet)}</section>
     <button class="btn" type="button" id="obNextH">다음</button><p class="muted" style="margin:4px 0 0;font-size:12px;text-align:center">비공식 팬 게임이에요. 수익을 내지 않으며 F1·FIA·각 팀과 관련이 없어요. 팀명·로고·선수명 등 상표는 각 소유자의 것이에요.</p>`;
   if(ob.step===2)return`<header class="top"><button class="iconbtn" type="button" id="obBack">이전</button>${steps}<button class="iconbtn" type="button" id="obRandom">랜덤</button></header>

@@ -163,10 +163,12 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .avopt .avface{width:100%!important;height:auto!important;aspect-ratio:1}
 .avopt[aria-pressed="true"]{border-color:var(--accent)}
 .obstage{flex:none}
-.obtag{display:flex;flex-direction:column;gap:2px;min-width:0}
-.obtag b{font-size:34px;line-height:1;color:#fff}
-.obtag span{font-size:18px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.obtag em{font-style:normal;font-size:13px;color:#9AA3B2}
+.obtag{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.obname{font-size:30px;font-weight:800;line-height:1.1;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.obmeta{display:flex;align-items:center;gap:8px;min-width:0}
+.obmeta .helmet{background:none;border-radius:0}
+.obmeta b{font-size:24px;line-height:1;color:#fff}
+.obmeta em{font-style:normal;font-size:14px;color:#9AA3B2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ovr{font-family:var(--num);font-weight:700;font-size:44px;line-height:1;color:var(--fg)}
 .ovr small{display:block;font-family:var(--body);font-size:12px;color:var(--muted);font-weight:500;text-align:right}
 .bar{height:8px;background:var(--surface-2);border-radius:8px;overflow:hidden;flex:1}
@@ -2301,14 +2303,14 @@ function obInit(){
 }
 function obView(){
   const steps=`<div class="steps">${[1,2,3,4].map(i=>`<i class="${i<=ob.step?'on':''}"></i>`).join('')}</div>`;
-  const hero=`<section class="obhero"><div class="obstage">${avatar(ob.av,ob.helmet,150,true)}</div><div class="obtag">${helmet(ob.helmet,ob.num,64)}<b class="num">#${esc(ob.num)}</b><span>${esc(ob.name.trim()||'이름 없음')}</span><em>${esc(K.nationalities[ob.nat]||'')}</em></div></section>`;
+  const hero=`<section class="obhero"><div class="obstage">${avatar(ob.av,ob.helmet,118,true)}</div><div class="obtag"><span class="obname">${esc(ob.name.trim()||'이름 없음')}</span><div class="obmeta">${helmet(ob.helmet,null,44)}<b class="num">#${esc(ob.num)}</b><em>${esc(K.nationalities[ob.nat]||'')}</em></div></div></section>`;
   if(ob.step===1)return`<header class="top"><span></span>${steps}<button class="iconbtn" type="button" id="obRandom">랜덤</button></header>
     <div><div class="eyebrow">${B.driver.start_age}세, 카트에서 시작해요</div><h2 class="h2">나만의 헬멧을 만들어 주세요</h2><p class="muted" style="margin:6px 0 0">슈트 색도 헬멧 색을 따라가요.</p></div>
     <section class="obhero obhel">${helmet(ob.helmet,null,190)}</section>
     <section class="card">${helmetEditor(ob.helmet)}</section>
     <button class="btn" type="button" id="obNextH">다음</button><p class="muted" style="margin:4px 0 0;font-size:12px;text-align:center">비공식 팬 게임이에요. 수익을 내지 않으며 F1·FIA·각 팀과 관련이 없어요. 팀명·로고·선수명 등 상표는 각 소유자의 것이에요.</p>`;
   if(ob.step===2)return`<header class="top"><button class="iconbtn" type="button" id="obBack">이전</button>${steps}<button class="iconbtn" type="button" id="obRandom">랜덤</button></header>
-    <div><h2 class="h2">어떤 드라이버로<br>살아볼까요?</h2></div>
+    <div><h2 class="h2">어떤 드라이버로 살아볼까요?</h2></div>
     ${hero}
     <section class="card"><div class="avgrid">${AVATAR.map((_,i)=>`<button class="avopt" type="button" data-av="${i}" aria-pressed="${i===ob.av}" aria-label="드라이버 ${i+1}">${avatar(i,ob.helmet,64)}</button>`).join('')}</div></section>
     <section class="card"><div class="grid2"><label class="lbl" for="obName">이름<input class="field" id="obName" maxlength="12" placeholder="이름" value="${esc(ob.name)}"></label>
@@ -2762,7 +2764,7 @@ async function saveFile(filename,data){
 }
 root.addEventListener('input',e=>{
   if(!ob||S)return;
-  if(e.target.id==='obName'){ob.name=e.target.value;const t=document.querySelector('.obtag span');if(t)t.textContent=ob.name.trim()||'이름 없음';const b=document.getElementById('obNext1');if(b)b.disabled=!ob.name.trim()}
+  if(e.target.id==='obName'){ob.name=e.target.value;const t=document.querySelector('.obname');if(t)t.textContent=ob.name.trim()||'이름 없음';const b=document.getElementById('obNext1');if(b)b.disabled=!ob.name.trim()}
   if(e.target.id==='obNum'){ob.num=clamp(parseInt(e.target.value)||2,2,99)}
 });
 root.addEventListener('change',e=>{if(e.target.id==='obNat'){ob.nat=e.target.value;if(!ob.avPick)ob.av=avDefault(ob.nat);render()}if(e.target.id==='obNum'){ob.num=clamp(parseInt(e.target.value)||2,2,99);render()}});

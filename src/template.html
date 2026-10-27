@@ -2303,7 +2303,7 @@ function obInit(){
 }
 function obView(){
   const steps=`<div class="steps">${[1,2,3,4].map(i=>`<i class="${i<=ob.step?'on':''}"></i>`).join('')}</div>`;
-  const hero=`<section class="obhero"><div class="obstage">${avatar(ob.av,ob.helmet,118,true)}</div><div class="obtag"><span class="obname">${esc(ob.name.trim()||'이름 없음')}</span><div class="obmeta">${helmet(ob.helmet,null,44)}<b class="num">#${esc(ob.num)}</b><em>${esc(K.nationalities[ob.nat]||'')}</em></div></div></section>`;
+  const hero=`<section class="obhero"><div class="obstage">${avatar(ob.av,ob.helmet,118,true)}</div><div class="obtag"><div class="obmeta">${helmet(ob.helmet,null,44)}<b class="num">#${esc(ob.num)}</b><em>${esc(K.nationalities[ob.nat]||'')}</em></div><span class="obname">${esc(ob.name.trim()||'이름 없음')}</span></div></section>`;
   if(ob.step===1)return`<header class="top"><span></span>${steps}<button class="iconbtn" type="button" id="obRandom">랜덤</button></header>
     <div><div class="eyebrow">${B.driver.start_age}세, 카트에서 시작해요</div><h2 class="h2">나만의 헬멧을 만들어 주세요</h2><p class="muted" style="margin:6px 0 0">슈트 색도 헬멧 색을 따라가요.</p></div>
     <section class="obhero obhel">${helmet(ob.helmet,null,190)}</section>

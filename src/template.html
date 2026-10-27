@@ -2812,7 +2812,7 @@ root.addEventListener('click',e=>{
     if(d.hb)h.base=d.hb;if(d.hs)h.sec=d.hs;if(d.hp)h.pat=d.hp;if(d.hv)h.vis=d.hv;tgt.helmet=h;if(S)save();render();return}
   if(id==='hRandom'&&S){S.p.helmet=randomHelmet();save();render();return}
   if(id==='obNextH'){ob.step=2;render();window.scrollTo(0,0);return}
-  if(id==='obNext1'){ob.step=3;render();window.scrollTo(0,0);return}
+  if(id==='obNext1'){ob.step=3;render();window.scrollTo(0,0);if(badName(ob.name))toast('이 이름은 랭킹에 올라가지 않아요. 게임은 그대로 할 수 있어요.');return}
   if(id==='obBack'){ob.step--;render();return}
   if(d.style){ob.style=d.style;render();return}
   if(id==='obNext2'){ob.step=4;render();window.scrollTo(0,0);return}

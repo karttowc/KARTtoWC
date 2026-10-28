@@ -2855,7 +2855,8 @@ const avDefault=nat=>AV_NAT[nat]??0;
 const AVIMG=[],AWIMG=[],AVC={};let spriteWait=false;
 function spriteImg(arr,src,i){if(typeof Image==='undefined')return null;if(!arr[i]){const im=new Image();im.onload=()=>{avFix();if(spriteWait){spriteWait=false;render()}};im.src=src[i];arr[i]=im}return arr[i]}
 /* overlays (champion, contract, ceremony) aren't redrawn by render(): repaint avatars still showing the raw green sprite */
-function avFix(){if(typeof document==='undefined')return;document.querySelectorAll('img[data-avp]').forEach(e=>{const d=e.dataset,c=avatarCanvas(+d.avp,{base:d.hb,sec:d.hs},!!d.aw);if(c){e.src=c.url;e.removeAttribute('data-avp')}})}
+function avFix(){if(typeof document==='undefined')return;document.querySelectorAll('img[data-avp]').forEach(e=>{const d=e.dataset,c=avatarCanvas(+d.avp,{base:d.hb,sec:d.hs},!!d.aw);if(c){e.src=c.url;e.removeAttribute('data-avp')}});
+  document.querySelectorAll('img.himg[data-hb]').forEach(e=>{const d=e.dataset,c=helmetCanvas({base:d.hb,sec:d.hs,vis:d.hvi});if(c){e.src=c.url;e.removeAttribute('data-hb')}})}
 /* recolour an image: rule(hue,sat,light,x,w) -> [[h,s,l], refLight] or null; lightness offset from refLight is kept */
 function recolor(im,rule){const c=document.createElement('canvas'),w=c.width=im.naturalWidth,ht=c.height=im.naturalHeight,g=c.getContext('2d');g.drawImage(im,0,0);
   const d=g.getImageData(0,0,w,ht),a=d.data;
@@ -3141,7 +3142,8 @@ function helmetCanvas(h){h=normHelmet(h);const pi=0,k=h.base+h.sec+h.vis;if(HC[k
   const B=hexHsl(h.base),Sx=hexHsl(h.sec),V=h.vis==='iri'?null:hexHsl(HVIS_COL[h.vis]||HVIS_COL.dark);
   return HC[k]=recolor(im,(hu,s,l,x,w)=>s>.2&&hu>.2&&hu<.45?[B,.45]:s>.2&&hu>.75&&hu<.95?[Sx,.45]:s>.2&&hu>=.45&&hu<.6?[V||[(x/w*1.6+.7)%1,.75,.5],.5]:null)}
 function helmetSrc(h){const c=helmetCanvas(h);if(c)return c.url;return HELMETS[0]}
-function helmetImg(h){return`<img class="himg" src="${helmetSrc(h)}" alt="">`}
+function helmetImg(h){if(helmetCanvas(h))return`<img class="himg" src="${helmetSrc(h)}" alt="">`;h=normHelmet(h);
+  return`<img class="himg" src="${HELMETS[0]}" data-hb="${h.base}" data-hs="${h.sec}" data-hvi="${h.vis}" alt="">`}
 function helmet(h,num,size=56){return`<div class="helmet" style="width:${size}px;height:${size}px">${helmetImg(h)}${num!=null?`<b class="hnum" style="font-size:${Math.round(size*.19)}px">${esc(num)}</b>`:''}</div>`}
 function drawHelmet(g,h,num,x0,y0,sc){const w=24*sc,c=helmetCanvas(h);if(!c)return;const ht=w*c.h/c.w;y0+=(w*.75-ht)/2+sc*2;
   g.imageSmoothingEnabled=false;g.drawImage(c.canvas,x0,y0,w,ht);g.imageSmoothingEnabled=true;

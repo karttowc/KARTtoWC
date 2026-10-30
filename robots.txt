@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://karttowc.github.io/sitemap.xml

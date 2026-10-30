@@ -6,3 +6,4 @@ __pycache__/
 !data/helmets_src/*.png
 play_logs.json
 play_logs_state.json
+!og.png

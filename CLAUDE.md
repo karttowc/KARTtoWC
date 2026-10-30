@@ -94,4 +94,4 @@ python3 tools/build.py && node --check build/game.js && node tools/test_render.j
 - 드라이버 등장(v0.22.0 완료): `avatar`(증명사진/전신), `avatarWin`(트로피 포즈 + 무대별 트로피를 손 뒤에 겹침, 챔피언 화면 `celebrate`). 결산 카드 `drawCard`는 증명사진. 사인 포즈 등은 나중에.
 - 헬멧 패턴·색 추가는 나중에(이미지 AI 8패턴 시트는 찬우가 별로라 해서 뺌, data/helmets_src/sheet.png에 보관). 드라이버 이름 프리셋은 넣지 않음.
 - 출시 전 전체 점검(풀 커리어 자동 실행 + 화면별 스크린샷) → v1.0.0 → main.
-- 공개할 때 검색 노출: meta·og·sitemap은 v0.26.13에서 완료. 구글 서치 콘솔 소유권 확인 완료(HTML 태그, 지우지 말 것). 네이버 인증 태그도 head에 넣음(지우지 말 것). 구글 sitemap 제출·색인 요청 완료.
+- 공개할 때 검색 노출: meta·og·sitemap은 v0.26.13에서 완료. 구글 서치 콘솔 소유권 확인 완료(HTML 태그, 지우지 말 것). 네이버 서치어드바이저 소유확인 완료(HTML 태그, 지우지 말 것). 구글 sitemap 제출·색인 요청 완료.
